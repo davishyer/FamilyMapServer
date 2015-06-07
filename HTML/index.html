@@ -1,0 +1,209 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+
+<!--        <link rel="stylesheet" href="css/normalize.css">    -->
+        <link rel="stylesheet" href="css/main.css">
+        <script src="js/vendor/modernizr-2.8.3.min.js"></script>
+
+        <script type="text/javascript">
+
+            function submit()
+            {
+                var handle = document.getElementById("handleBox").value;
+                var requestBody = document.getElementById("requestBox").value;
+                var token = document.getElementById("authToken").value;
+
+                post(handle,requestBody,"post", token);
+                return false;
+
+            }
+
+            function post(path, params, method, token)
+            {
+                var obj = new XMLHttpRequest();
+                obj.onreadystatechange = function()
+                {
+                    document.getElementById("response").value = formatJson(obj.responseText);
+                };
+                obj.open(method,path,false);
+                obj.setRequestHeader("Content-Type", "application/json");
+                obj.setRequestHeader("Authorization", token);
+                obj.send(params);
+
+
+
+            }
+
+            function formatJson(inputText)
+            {
+                var temp = "";
+                var indent = 0;
+                for(var i in inputText)
+                {
+                    var char = inputText[i];
+                    if(char != null)
+                    {
+                        if(char === ']' || char === '}')
+                        {
+                            temp += "\n";
+                            indent--;
+                            for(var j = 0; j < indent; j++)
+                            {
+                                temp += '\t';
+                            }
+
+                        }
+
+                        temp += char;
+
+                        if (char === ',')
+                        {
+                            temp += "\n";
+
+                            for(j = 0; j < indent; j++)
+                            {
+                                temp += '\t';
+                            }
+
+                        }
+                        if(char === '{' || char === '[')
+                        {
+                            temp += "\n";
+                            indent++;
+                            for(j = 0; j < indent; j++)
+                            {
+                                temp += '\t';
+                            }
+                        }
+                    }
+                }
+
+                return temp;
+            }
+
+            function fillEvent(input)
+            {
+                document.getElementById("handleBox").value = "/event/" + input;
+                document.getElementById("requestBox").value = "";
+            }
+            function fill()
+            {
+                document.getElementById("handleBox").value = "/fill/[replace with a user name]";
+                document.getElementById("requestBox").value = "";
+            }
+            function login()
+            {
+                document.getElementById("handleBox").value = "/user/login";
+                document.getElementById("requestBox").value = formatJson("{username:\"username\",password:\"password\"}");
+            }
+            function register()
+            {
+                document.getElementById("handleBox").value = "/user/register";
+                document.getElementById("requestBox").value = formatJson("{username:\"username\",password:\"password\"," +
+                    "email:\"email\",firstname:\"firstname\",lastname:\"lastname\"}");
+            }
+            function fillPerson(input)
+            {
+                document.getElementById("handleBox").value = "/person/" + input;
+                document.getElementById("requestBox").value = "";
+            }
+
+
+        </script>
+    </head>
+    <body>
+        <!--[if lt IE 8]>
+            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+        <!-- Add your site or application content here -->
+        <div>
+            <h2>
+                <p>Hello world! This is the Family Map server used to power the Family Map Android App.</p>
+            </h2>
+        </div>
+        <div>
+            <h4>The RESTapi that will be used is listed below. Some of the handlers require a request body
+                 to be sent (namely login and register) while others require an Authorization token (received at login).
+                To view the JSON format required for "/login" and "/register" simply click on the below link and look in the request body.
+                To try out the handlers click on one. It will fill the boxes below with the bare bones data.
+                Edit the data as needed and click submit.</h4>
+            <ul>
+                <li>
+                    <a href="javascript:login()" >/user/login</a> Use this to log a user in. A request body must be supplied specifying the username and password.
+                    If authenticated an authorization token will be returned. Use this token on other handlers that require authorization. The return Json object contains
+                    "Authorization" (the authorization token) and "username" (the username that was just logged in).
+                </li>
+                <li>
+                    <a href="javascript:register()" >/user/register</a> Use this to register a user. An authorization token is returned. Use it just as you would a
+                    token from login. Returns the same Json object as log in.
+                </li>
+                <li>
+                    <a href="javascript:fill()" >/fill/[username]/{generations}/{true}</a> This handle will fill the servers database with fake data. The username
+                    is required and can be any user name you choose. (Just remember to register with the same user name or the
+                    data created here wont be accessible). If there is any data in the database associated with the given user name it is erased.
+                    The "generations" is optional and says how many generations back you
+                    want the data to go; the default value is 5. Finally, the true is also optional and says whether or not to erase
+                    all the data in the entire database. The default value is false. This handle can be run from a browser
+                    (and probably should be) by simply typing it in the to address bar. No authorization token is required.
+                </li>
+                <li>
+                    <a href="javascript:fillEvent(new String (''));">/event/</a>  This handle will get ALL the events for ALL family members for a specific user. That is all the events for all the people
+                    who are associated with this user. This handle requires an authorization token and the user that is associated with that token will be the "specified user" mentioned above.
+                    The returning Json object contains "data" which is an array of event objects in Json format.
+                </li>
+                <li>
+                    <a href="javascript:fillEvent(new String('[Repalce With an Event ID]'))">/event/[eventID]</a> This will get one specific event, that event specified by the ID. This still requires an
+                    authorization token. The returning json is an event object in json format.
+                </li>
+                <li>
+                    <a href="javascript:fillPerson(new String(''))" >/person/</a> This will return all the people that are assocated with the username whos token was provided. That is
+                    to say that a token is required, and all the people in the server who were filled with that user name's token
+                    will be returned. The returning Json object contains "data" which is an array of person objects in Json format.
+                </li>
+                <li>
+                    <a href="javascript:fillPerson(new String('[Repalce With a Person ID]'))" >/person/[personID]</a> This will return a specific person based on the personID listed. An authorization token
+                    is required. The returning json is a person object in json format.
+                </li>
+            </ul>
+        </div>
+            <h5>
+                A few notes:
+                <ul>
+                    <li>
+                        The authorization token must be placed in the header "Authorization" and the token is returned under the tag
+                        "Authorization" when logging in or registering.
+                    </li>
+                    <li>
+                        If something fails a json is returned with the tag "emessage". Watch for these as they will give helpful
+                        insight into why the server didn't work as expected.
+                    </li>
+                </ul>
+            </h5>
+        <p>Try it out here</p>
+        <div class="forumDiv">
+            Handle:<input type="text" id="handleBox" name="handleBox" style="width: 350px">
+            Request Body:<textarea type="text" id="requestBox" name="requestBox" class="requestBody"></textarea>
+            Authorization token: <input type="text" id="authToken" name="authToken">
+            <input type="button" name="Submit" value="Submit" onclick="submit()">
+        </div>
+        <div>
+            Response From the server: <textarea type="text" id="response" class="responseBody"></textarea>
+        </div>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/{{JQUERY_VERSION}}/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-{{JQUERY_VERSION}}.min.js"><\/script>')</script>
+        <script src="js/plugins.js"></script>
+        <script src="js/main.js"></script>
+
+    </body>
+</html>
