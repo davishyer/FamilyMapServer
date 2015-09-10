@@ -219,7 +219,7 @@ public class MainServer
 					Person person = facade.getPersonByID(params[2], user.username);
 					if(person == null)
 						sendOutData(makeEMessage("No one here by that ID number or incorrect token "
-								+ "(the token provided doenst match the requested persons descendant"), exchange);
+								+ "(the token provided doesn't match the requested persons descendant"), exchange);
 					else
 						sendOutData(person, exchange);
 				}
@@ -246,7 +246,7 @@ public class MainServer
 			String[] params=theCommand.split("/");
 			
 			if(params.length < 2)
-				sendOutData(makeEMessage("Please specifiy a more info (event OR person OR fill OR users)"), exchange);
+				sendOutData(makeEMessage("Please specifiy more info (event OR person OR fill OR users)"), exchange);
 			else
 			{
 				String token = exchange.getRequestHeaders().getFirst("Authorization");
@@ -263,7 +263,8 @@ public class MainServer
 						Event event = facade.getEventByID(params[2], user.username);
 						if(event == null)
 							sendOutData(makeEMessage("No event found by that id number or incorrect token "
-								+ "(the token provided doenst match the requested events descendant"), exchange);
+								+ "(the token provided doesn't match the requested event's descendant, aka you are tring to "
+								+ "get someone else's families events.)"), exchange);
 						else
 							sendOutData(event, exchange);
 					}

@@ -228,7 +228,7 @@ public class DataBase
 			stmt2.setString(1, username);
 			
 			stmt.execute();
-			stmt.execute();
+			stmt2.execute();
 		}
 		catch(SQLException e)
 		{
