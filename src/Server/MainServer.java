@@ -59,14 +59,28 @@ public class MainServer
 		else
 		{
 			SERVER_PORT_NUMBER = Integer.valueOf(args[0]);		
-			System.out.println("Server started on port:" + args[0]);
 			
 			if(args.length > 1)
 			{
 				MAX_GENERATIONS = Integer.parseInt(args[1]);
 			}
 			
+			File htmlF = new File("HTML");
+			if(!htmlF.exists()) 
+			{
+				System.out.println("The HTML folder is missing. The server can not run with out it. Shutting down!");
+				return;
+			}
+			File dataF = new File("data");
+			if(!dataF.exists()) 
+			{
+				System.out.println("The data folder is missing. The server can not run with out it. Shutting down!");
+				return;
+			}
+			
+			
 			new MainServer().run();		
+			System.out.println("Server started on port:" + args[0]);
 		}
 	}
 	
@@ -97,7 +111,7 @@ public class MainServer
 			}
 			
 			System.out.println("\n" + probableAddress + ":" + String.valueOf(SERVER_PORT_NUMBER) + 
-								" <---------- Most likly choice to use from android device");
+								" <---------- Most likely choice to use from android device");
 		}
 		catch (IOException e)
 		{
@@ -139,7 +153,7 @@ public class MainServer
 			
 			if(params.length <= 2)
 			{
-				sendOutData(makeEMessage("Failed. Please specifier a user. Example: /fill/[USERNAME]"), exchange);
+				sendOutData(makeEMessage("Failed. Please specifiy a user. Example: /fill/[USERNAME]"), exchange);
 				return;
 			}
 			
@@ -148,7 +162,7 @@ public class MainServer
 				levels = Integer.parseInt(params[3]);
 				if(levels > MAX_GENERATIONS)
 				{
-					sendOutData("Too many levels. Please pick a number below 6 for the number of levels", exchange);
+					sendOutData("Too many levels. Please pick a number below " + String.valueOf(MAX_GENERATIONS) + " for the number of levels", exchange);
 					return;
 				}
 			}
@@ -263,7 +277,7 @@ public class MainServer
 						Event event = facade.getEventByID(params[2], user.username);
 						if(event == null)
 							sendOutData(makeEMessage("No event found by that id number or incorrect token "
-								+ "(the token provided doesn't match the requested event's descendant, aka you are tring to "
+								+ "(the token provided doesn't match the requested event's descendant, a.k.a. you are tring to "
 								+ "get someone else's families events.)"), exchange);
 						else
 							sendOutData(event, exchange);

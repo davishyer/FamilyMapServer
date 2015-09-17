@@ -40,6 +40,20 @@ public class DataBase
 	public void openConnection()
 	{
 		//String dbName = "database.sqlite";
+		File directory = new File("db");
+		if(!directory.exists())
+		{
+			try
+			{
+				directory.mkdirs();
+			}
+			catch(SecurityException se)
+			{
+				System.out.println("Error creating the folder for the DB files! The server can not work correctly with out this!");
+				return;
+			}
+		}
+		
 		String dbName = "db" + File.separator + "database.sqlite";
 		String connectionURL = "jdbc:sqlite:" + dbName;
 		connection = null;
@@ -54,6 +68,7 @@ public class DataBase
 			System.out.print("SQL error\n");
 		}
 		return;
+		
 		
 	}
 
