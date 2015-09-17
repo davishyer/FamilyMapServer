@@ -107,7 +107,7 @@ public class DataImporter
 	private Person fillPerson(boolean male, int birthYear) throws SQLException
 	{
 		Person person = new Person();
-		person.descendent = username; //username of associasted descendent
+		person.descendant = username; //username of associasted descendent
 	    person.personID = UUID.randomUUID().toString();
 	    
 	    if(male && Math.random() > 0.999)
@@ -209,7 +209,7 @@ public class DataImporter
 	private Event makeEvent(Person person, String describe, int year) throws SQLException
 	{
 		Event event = new Event();
-		event.descendent = username;
+		event.descendant = username;
 		event.eventID = UUID.randomUUID().toString(); //unique ID
 	    event.personID = person.personID; //personID of associated person
 	    
@@ -279,7 +279,7 @@ public class DataImporter
 	private void fill()
 	{
 		Abe = new Person();
-		Abe.descendent = username;
+		Abe.descendant = username;
 		Abe.father = null;
 		Abe.mother = null;
 		Abe.gender = "m";
@@ -291,7 +291,7 @@ public class DataImporter
 		abeBirth = new Event();
 		abeBirth.city = "Hodgenville";
 		abeBirth.country = "USA";
-		abeBirth.descendent = username;
+		abeBirth.descendant = username;
 		abeBirth.description = "birth";
 		abeBirth.eventID = UUID.randomUUID().toString();
 		abeBirth.personID = Abe.personID;
@@ -302,7 +302,7 @@ public class DataImporter
 		abeDeath = new Event();
 		abeDeath.city = "DC";
 		abeDeath.country = "USA";
-		abeDeath.descendent = username;
+		abeDeath.descendant = username;
 		abeDeath.description = "death";
 		abeDeath.eventID = UUID.randomUUID().toString();
 		abeDeath.personID = Abe.personID;
@@ -311,7 +311,7 @@ public class DataImporter
 		abeDeath.year = "1865";
 		
 		GW = new Person();
-		GW.descendent = username;
+		GW.descendant = username;
 		GW.father = null;
 		GW.mother = null;
 		GW.gender = "m";
@@ -323,7 +323,7 @@ public class DataImporter
 		GWBirth = new Event();
 		GWBirth.city = "Westmoreland";
 		GWBirth.country = "USA";
-		GWBirth.descendent = username;
+		GWBirth.descendant = username;
 		GWBirth.description = "birth";
 		GWBirth.eventID = UUID.randomUUID().toString();
 		GWBirth.personID = GW.personID;
@@ -334,7 +334,7 @@ public class DataImporter
 		GWDeath = new Event();
 		GWDeath.city = "Mount Vernon";
 		GWDeath.country = "USA";
-		GWDeath.descendent = username;
+		GWDeath.descendant = username;
 		GWDeath.description = "death";
 		GWDeath.eventID = UUID.randomUUID().toString();
 		GWDeath.personID = GW.personID;

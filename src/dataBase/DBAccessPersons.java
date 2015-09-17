@@ -23,7 +23,7 @@ public class DBAccessPersons
 	{
 		PreparedStatement stmt = null;
 	    ResultSet keyRS = null;
-		String sql = "insert into persons (descendent, personid, firstName, lastName, gender, "
+		String sql = "insert into persons (descendant, personid, firstName, lastName, gender, "
 				+ "father, mother, spouse)"
 						+ " values (?, ?, ?, ?, ?, ?, ?, ?)";
 		
@@ -33,7 +33,7 @@ public class DBAccessPersons
 		try
 		{
 			stmt = db.connection.prepareStatement(sql);
-			stmt.setString(1, person.descendent);
+			stmt.setString(1, person.descendant);
 			stmt.setString(2, person.personID);
 			stmt.setString(3, person.firstName);
 			stmt.setString(4, person.lastName);
@@ -84,7 +84,7 @@ public class DBAccessPersons
 			while(rs.next())
 			{
 				person = new Person();
-				person.descendent = rs.getString(1); //username of associasted descendent
+				person.descendant = rs.getString(1); //username of associasted descendent
 			    person.personID = rs.getString(2); //unique id
 			    person.firstName = rs.getString(3);
 			    person.lastName = rs.getString(4);
@@ -116,7 +116,7 @@ public class DBAccessPersons
 		List<Person> persons = null;
 		try
 		{
-			String sql = "select * from persons where persons.descendent = ?";
+			String sql = "select * from persons where persons.descendant = ?";
 			stmt = db.connection.prepareStatement(sql);
 			stmt.setString(1, username);
 			rs = stmt.executeQuery();
@@ -125,7 +125,7 @@ public class DBAccessPersons
 			while(rs.next())
 			{
 				Person person = new Person();
-				person.descendent = rs.getString(1); //username of associasted descendent
+				person.descendant = rs.getString(1); //username of associasted descendent
 			    person.personID = rs.getString(2); //unique id
 			    person.firstName = rs.getString(3);
 			    person.lastName = rs.getString(4);

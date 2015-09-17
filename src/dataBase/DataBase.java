@@ -123,7 +123,7 @@ public class DataBase
 		String sql = 
 				"CREATE TABLE IF NOT EXISTS EVENTS"+
 				"("+
-				"descendent varchar(64),"+
+				"descendant varchar(64),"+
 				"eventid varchar(64) primary key,"+
 				"personid varchar(64),"+
 				"latitude real,"+
@@ -136,7 +136,7 @@ public class DataBase
 
 		String sql2 = "CREATE TABLE IF NOT EXISTS PERSONS"+
 				"("+
-				"descendent varchar(64),"+
+				"descendant varchar(64),"+
 				"personid varchar(64) primary key,"+
 				"firstName varchar(64),"+
 				"lastName varchar(64),"+
@@ -175,7 +175,7 @@ public class DataBase
 		String sql1 = 
 				"CREATE TABLE EVENTS"+
 				"("+
-				"descendent varchar(64),"+
+				"descendant varchar(64),"+
 				"eventid varchar(64) primary key,"+
 				"personid varchar(64),"+
 				"latitude real,"+
@@ -188,7 +188,7 @@ public class DataBase
 
 		String sql3 = "CREATE TABLE PERSONS"+
 				"("+
-				"descendent varchar(64),"+
+				"descendant varchar(64),"+
 				"personid varchar(64) primary key,"+
 				"firstName varchar(64),"+
 				"lastName varchar(64),"+
@@ -234,8 +234,8 @@ public class DataBase
 	{
 		try
 		{
-			String personTable = "Delete from persons where descendent = ?";
-			String eventTable = "Delete from events where descendent = ?";
+			String personTable = "Delete from persons where descendant = ?";
+			String eventTable = "Delete from events where descendant = ?";
 			PreparedStatement stmt = this.connection.prepareStatement(personTable);
 			PreparedStatement stmt2 = this.connection.prepareStatement(eventTable);
 			

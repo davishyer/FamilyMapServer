@@ -23,14 +23,14 @@ public class DBAccessEvents
 	{
 		PreparedStatement stmt = null;
 	    ResultSet keyRS = null;
-		String sql = "insert into events (descendent, eventid, personid, latitude, longitude, country, "
+		String sql = "insert into events (descendant, eventid, personid, latitude, longitude, country, "
 				+ "city, description, year)"
 						+ " values (?,?, ?, ?, ?, ?, ?, ?, ?)";
 		
 		try
 		{
 			stmt = db.connection.prepareStatement(sql);
-			stmt.setString(1, event.descendent);
+			stmt.setString(1, event.descendant);
 			stmt.setString(2, event.eventID);
 			stmt.setString(3, event.personID);
 			stmt.setDouble(4, event.latitude);
@@ -79,7 +79,7 @@ public class DBAccessEvents
 			while(rs.next())
 			{
 				event = new Event();
-				event.descendent = rs.getString(1);
+				event.descendant = rs.getString(1);
 				event.eventID = rs.getString(2); //unique ID
 			    event.personID = rs.getString(3); //personID of associated person
 			    event.latitude = rs.getDouble(4);
@@ -120,7 +120,7 @@ public class DBAccessEvents
 			while(rs.next())
 			{
 				Event event = new Event();
-				event.descendent = rs.getString(1);
+				event.descendant = rs.getString(1);
 				event.eventID = rs.getString(2); //unique ID
 			    event.personID = rs.getString(3); //personID of associated person
 			    event.latitude = rs.getDouble(4);

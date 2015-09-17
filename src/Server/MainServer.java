@@ -78,9 +78,8 @@ public class MainServer
 				return;
 			}
 			
-			
-			new MainServer().run();		
 			System.out.println("Server started on port:" + args[0]);
+			new MainServer().run();		
 		}
 	}
 	

@@ -10,7 +10,7 @@ public class Event implements Comparable<Event>
     public String city;
     public String description;
 	public String year;
-	public String descendent;
+	public String descendant;
 	
 	@Override
     public int compareTo(Event rhs)

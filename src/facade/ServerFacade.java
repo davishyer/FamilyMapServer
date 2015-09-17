@@ -75,7 +75,7 @@ public class ServerFacade
 		try
 		{
 			event = db.eventsTable.getEventByID(eventID);
-			if(event == null || !event.descendent.equals(username))
+			if(event == null || !event.descendant.equals(username))
 				event = null;
 			db.closeTransaction(true);
 		}
@@ -96,7 +96,7 @@ public class ServerFacade
 		try
 		{
 			person = db.personTable.getPersonByID(personID);
-			if(person == null || !person.descendent.equals(username))
+			if(person == null || !person.descendant.equals(username))
 				person = null;
 			db.closeTransaction(true);
 		}
