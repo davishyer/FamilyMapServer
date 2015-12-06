@@ -146,11 +146,26 @@
         </div>
         <div>
             <h4>The web API that will be used is described below. Some of the APIs require a request body
-                 to be sent (namely "/login" and "/register"), while others require an Authorization token (received at login).
-                To view the JSON format required for "/login" and "/register" simply click on the link below and look in the request body.
+                 to be sent (namely "/user/login" and "/user/register"), while others require an Authorization token (received at login).
+                To view the JSON format required for "/user/login" and "/user/register" simply click on the link below and look in the request body.
                 To try out an API, click on its link below. It will fill the boxes below with the data to be sent with the request.
                 Edit the data as needed and click Submit.</h4>
             <ul>
+                <li>
+                    <a href="javascript:clear()" >/clear</a> This API will clear ALL data from the database, including users and all generated data.
+                    This API can be run from a browser by simply typing it in the address bar.
+                    No authorization token is required.
+                </li>
+                <li>
+                    <a href="javascript:fill()" >/fill/[username]/{generations}</a> This API will fill the server&apos;s database with fake data for the specified user name.
+                    The "username" parameter is required and can be any user name you choose.
+                    (Just remember to register with the same user name or the data created here will not be accessible).
+                    If there is any data in the database associated with the given user name, it is erased.
+                    The "generations" parameter is optional and indicates how many generations back you want the data to go; the default value is 5.
+                    This API can be run from a browser by simply typing it in the address bar.
+                    No authorization token is required.
+                    <p></p>
+                </li>
                 <li>
                     <a href="javascript:login()" >/user/login</a> Use this to log in a user. A request body must be supplied specifying the username and password.
                     If login succeeds, an authorization token will be returned. Use this token on other API calls that require authorization. The returned JSON object contains
@@ -159,18 +174,6 @@
                 <li>
                     <a href="javascript:register()" >/user/register</a> Use this to register a user. An authorization token is returned. Use it just as you would a
                     token from login. Returns the same Json object as log in.
-                </li>
-                <li>
-                    <a href="javascript:clear()" >/clear</a> This API will clear ALL data from the database. No authorization token is required.
-                </li>
-                <li>
-                    <a href="javascript:fill()" >/fill/[username]/{generations}</a> This API will fill the server&apos;s database with fake data for the specified user name.
-                    The "username" parameter is required and can be any user name you choose.
-                    (Just remember to register with the same user name or the data created here will not be accessible).
-                    If there is any data in the database associated with the given user name, it is erased.
-                    The "generations" parameter is optional and indicates how many generations back you want the data to go; the default value is 5.
-                    This API can be run from a browser by simply typing it in the to address bar.
-                    No authorization token is required.
                 </li>
                 <li>
                     <a href="javascript:getAllEvents()">/event</a> This API will return ALL events for ALL family members of the current user.
