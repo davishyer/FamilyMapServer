@@ -45,15 +45,14 @@ public class MainServer
 	private static int SERVER_PORT_NUMBER;
 	private ServerFacade facade;
 	private Gson gson = new Gson();
-	DateFormat dateFormat = new SimpleDateFormat("hh:mm:ss a");
-	
-	
+	private DateFormat dateFormat = new SimpleDateFormat("hh:mm:ss a");
+
 	public static void main(String[] args)		
 	{				
 		if(args.length < 1)
 		{
 			System.out.println("More arguments needed. Please specify the port number and optionally"
-					+ " the default number of max generations that are allowed on the /fill/ endpoint."
+					+ " the default number of max generations that are allowed on the /fill/ API."
 					+ " eg: SERVER.JAR 8080 5");
 		}
 		else
@@ -120,11 +119,12 @@ public class MainServer
 		}
 		
 		server.setExecutor(null);
-		
-		server.createContext("/fill/", fillHandler);
-		server.createContext("/person/", personHandler);
-		server.createContext("/event/", eventHandler);
-		server.createContext("/user/", usersHandler);
+
+		server.createContext("/clear", clearHandler);
+		server.createContext("/fill", fillHandler);
+		server.createContext("/person", personHandler);
+		server.createContext("/event", eventHandler);
+		server.createContext("/user", usersHandler);
 
 		server.createContext("/", indexHandler);
 		
@@ -132,27 +132,56 @@ public class MainServer
 		
 		server.start();
 	}
-	
+
+	private HttpHandler clearHandler = new HttpHandler()
+	{
+		@Override
+		public void handle(HttpExchange exchange)
+		{
+			Calendar cal = Calendar.getInstance();
+			System.out.println("Clear API was just called at " + dateFormat.format(cal.getTime()));
+			URI command=exchange.getRequestURI();
+			String theCommand=command.toString();
+
+			System.out.println("    Received URI: " + theCommand);
+
+			DataBase db = new DataBase();
+			try
+			{
+				db.startTransaction();
+				db.resetDB(true);
+				db.closeTransaction(true);
+			}
+			catch(SQLException e)
+			{
+				e.printStackTrace();
+				db.closeTransaction(false);
+			}
+
+			sendOutData(makeMessage("Clear succeeded."), exchange);
+		}
+
+	};
+
 	private HttpHandler fillHandler = new HttpHandler()
 	{
 		@Override 
 		public void handle(HttpExchange exchange)
 		{
 			Calendar cal = Calendar.getInstance();
-			System.out.println("Fill endpoint was just called at " + dateFormat.format(cal.getTime()));
+			System.out.println("Fill API was just called at " + dateFormat.format(cal.getTime()));
 			URI command=exchange.getRequestURI();
 			String theCommand=command.toString();
 			
 			System.out.println("    Received URI: " + theCommand);
 
 			String[] params=theCommand.split("/");
-			
-			
+
 			int levels = MAX_GENERATIONS;
 			
 			if(params.length <= 2)
 			{
-				sendOutData(makeEMessage("Failed. Please specify a user. Example: /fill/[USERNAME]"), exchange);
+				sendOutData(makeMessage("Failed. Please specify a user. Example: /fill/[USERNAME]"), exchange);
 				return;
 			}
 			
@@ -165,27 +194,7 @@ public class MainServer
 					return;
 				}
 			}
-			else if(params.length >= 4 && isNumeric(params[3]))
-			{
-				levels = Integer.parseInt(params[3]);
-				if(Boolean.valueOf(params[4]))
-				{
-					DataBase db = new DataBase();
-					try
-					{
-						db.startTransaction();
-						db.resetDB(true);
-						db.closeTransaction(true);
-					}
-					catch(SQLException e)
-					{
-						e.printStackTrace();
-						db.closeTransaction(false);
-					}
-				}
-			}
-	
-			
+
 			String report = new DataImporter().runImport(params[2], levels);							
 			sendOutData(report, exchange);
 		}
@@ -198,7 +207,7 @@ public class MainServer
 		public void handle(HttpExchange exchange) throws IOException 
 		{
 			Calendar cal = Calendar.getInstance();
-			System.out.println("Person endpoint was just called at " + dateFormat.format(cal.getTime()));
+			System.out.println("Person API was just called at " + dateFormat.format(cal.getTime()));
 			URI command=exchange.getRequestURI();
 			String theCommand=command.toString();
 			
@@ -210,7 +219,7 @@ public class MainServer
 			System.out.println("    Auth Token: " + token);
 			
 			if(token == null)
-				sendOutData(makeEMessage("Missing or Bad access token"),exchange);
+				sendOutData(makeMessage("Missing or Bad access token"),exchange);
 			else if (facade.authenticateToken(token))
 			{
 				User user = facade.getUserByAccessToken(token);
@@ -225,22 +234,22 @@ public class MainServer
 						sendOutData(json, exchange);
 					}
 					else
-						sendOutData(makeEMessage("Error finding ancestors"), exchange);
+						sendOutData(makeMessage("Error finding ancestors"), exchange);
 				}
 				else if (params.length == 3)
 				{
 					Person person = facade.getPersonByID(params[2], user.username);
 					if(person == null)
-						sendOutData(makeEMessage("No one here by that ID number or incorrect token "
+						sendOutData(makeMessage("No one here by that ID number or incorrect token "
 								+ "(the token provided does not match the requested persons descendant"), exchange);
 					else
 						sendOutData(person, exchange);
 				}
 				else
-					sendOutData(makeEMessage("Badly formed URI. EG: address:port/person/"), exchange);
+					sendOutData(makeMessage("Badly formed URI. EG: address:port/person/"), exchange);
 			}
 			else
-				sendOutData(makeEMessage("Not authenticated access token"), exchange);
+				sendOutData(makeMessage("Not authenticated access token"), exchange);
 			
 		}
 	};
@@ -251,7 +260,7 @@ public class MainServer
 		public void handle(HttpExchange exchange) throws IOException 
 		{
 			Calendar cal = Calendar.getInstance();
-			System.out.println("Event endpoint was just called at " + dateFormat.format(cal.getTime()));
+			System.out.println("Event API was just called at " + dateFormat.format(cal.getTime()));
 			URI command=exchange.getRequestURI();
 			String theCommand=command.toString();
 
@@ -259,14 +268,14 @@ public class MainServer
 			String[] params=theCommand.split("/");
 			
 			if(params.length < 2)
-				sendOutData(makeEMessage("Please specify more info (event OR person OR fill OR users)"), exchange);
+				sendOutData(makeMessage("Please specify more info (event OR person OR fill OR users)"), exchange);
 			else
 			{
 				String token = exchange.getRequestHeaders().getFirst("Authorization");
 				System.out.println("    Auth Token: " + token);
 				
 				if(token == null)
-					sendOutData(makeEMessage("Missing or Bad access token"),exchange);
+					sendOutData(makeMessage("Missing or Bad access token"),exchange);
 				
 				if(facade.authenticateToken(token))
 				{
@@ -275,21 +284,21 @@ public class MainServer
 					{
 						Event event = facade.getEventByID(params[2], user.username);
 						if(event == null)
-							sendOutData(makeEMessage("No event found by that id number or incorrect token "
-								+ "(the token provided does not match the requested event's descendant, a.k.a. you are trying to "
-								+ "get someone else's family events.)"), exchange);
+							sendOutData(makeMessage("No event found by that id number or incorrect token "
+									+ "(the token provided does not match the requested event's descendant, a.k.a. you are trying to "
+									+ "get someone else's family events.)"), exchange);
 						else
 							sendOutData(event, exchange);
 					}
 					else if (params.length > 3)
 					{
-						sendOutData(makeEMessage("Badly formed URI. EG: address:port/event/"), exchange);
+						sendOutData(makeMessage("Badly formed URI. EG: address:port/event/"), exchange);
 					}
 					else
 					{
 						List<Event> events = facade.getAllEventsFromFamilyByAccessToken(token);
 						if(events == null)
-							sendOutData(makeEMessage("Error getting events"), exchange);
+							sendOutData(makeMessage("Error getting events"), exchange);
 						else
 						{
 							JsonObject json = new JsonObject();
@@ -299,7 +308,7 @@ public class MainServer
 					}
 				}
 				else
-					sendOutData(makeEMessage("Access token not authenticated or missing"), exchange);
+					sendOutData(makeMessage("Access token not authenticated or missing"), exchange);
 			}
 		}
 	};
@@ -310,7 +319,7 @@ public class MainServer
 		public void handle(HttpExchange exchange)
 		{
 			Calendar cal = Calendar.getInstance();
-			System.out.println("Users endpoint was just called at " + dateFormat.format(cal.getTime()));
+			System.out.println("Users API was just called at " + dateFormat.format(cal.getTime()));
 			URI command=exchange.getRequestURI();
 			String theCommand=command.toString();
 
@@ -318,7 +327,7 @@ public class MainServer
 			String[] params=theCommand.split("/");
 			
 			if(params.length < 3)
-				sendOutData(makeEMessage("More info needed. eg. /users/[LOGIN] OR [REGISTER]"), exchange);
+				sendOutData(makeMessage("More info needed. eg. /users/[LOGIN] OR [REGISTER]"), exchange);
 			else
 			{
 				if(params[2].equals("login"))
@@ -337,7 +346,7 @@ public class MainServer
 							user.username = json.get("username").getAsString();
 						else
 						{
-							sendOutData(makeEMessage("Missing user name in post body"), exchange);
+							sendOutData(makeMessage("Missing user name in post body"), exchange);
 							return;
 						}
 						
@@ -345,7 +354,7 @@ public class MainServer
 							user.password = json.get("password").getAsString();
 						else
 						{
-							sendOutData(makeEMessage("Missing password in post body"), exchange);
+							sendOutData(makeMessage("Missing password in post body"), exchange);
 							return;
 						}
 						
@@ -359,9 +368,10 @@ public class MainServer
 						}
 						else
 						{
-							sendOutData(makeEMessage("User name or password is wrong"), exchange);
+							sendOutData(makeMessage("User name or password is wrong"), exchange);
 						}
-					}catch(IOException e)
+					}
+					catch(IOException e)
 					{
 						e.printStackTrace();
 						System.out.println("    Error with stream " + e.getMessage());
@@ -382,7 +392,7 @@ public class MainServer
 							user.username = json.get("username").getAsString();
 						else
 						{
-							sendOutData(makeEMessage("Missing user name in post body"), exchange);
+							sendOutData(makeMessage("Missing user name in post body"), exchange);
 							return;
 						}
 						
@@ -390,7 +400,7 @@ public class MainServer
 							user.password = json.get("password").getAsString();
 						else
 						{
-							sendOutData(makeEMessage("Missing password in post body"), exchange);
+							sendOutData(makeMessage("Missing password in post body"), exchange);
 							return;
 						}
 						
@@ -398,7 +408,7 @@ public class MainServer
 							user.email = json.get("email").getAsString();
 						else
 						{
-							sendOutData(makeEMessage("Missing email in post body"), exchange);
+							sendOutData(makeMessage("Missing email in post body"), exchange);
 							return;
 						}
 						
@@ -406,7 +416,7 @@ public class MainServer
 							user.firstName = json.get("firstname").getAsString();
 						else
 						{
-							sendOutData(makeEMessage("Missing first name in post body"), exchange);
+							sendOutData(makeMessage("Missing first name in post body"), exchange);
 							return;
 						}
 						
@@ -414,13 +424,13 @@ public class MainServer
 							user.lastName = json.get("lastname").getAsString();
 						else
 						{
-							sendOutData(makeEMessage("Missing last name in post body"), exchange);
+							sendOutData(makeMessage("Missing last name in post body"), exchange);
 							return;
 						}
 						
 						if(facade.duplicateNameFound(user.username))
 						{
-							sendOutData(makeEMessage("User name already taken. Try a different user name"), exchange);
+							sendOutData(makeMessage("User name already taken. Try a different user name"), exchange);
 						}
 						else if(facade.regesterUser(user))
 						{
@@ -431,7 +441,7 @@ public class MainServer
 							sendOutData(token, exchange);
 						}
 						else
-							sendOutData(makeEMessage("Error registering the user"), exchange);
+							sendOutData(makeMessage("Error registering the user"), exchange);
 							
 					}
 					catch(IOException e)
@@ -441,7 +451,6 @@ public class MainServer
 					}
 				}
 			}
-			
 		}
 	};
 	
@@ -451,14 +460,13 @@ public class MainServer
 		public void handle(HttpExchange exchange) throws IOException 
 		{
 			Calendar cal = Calendar.getInstance();
-			System.out.println("Index endpoint was just called at " + dateFormat.format(cal.getTime()));
+			System.out.println("Index API was just called at " + dateFormat.format(cal.getTime()));
 			Headers head=exchange.getResponseHeaders();
 			//head.set("Content-Type", "text/html");
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
 			
 			URI command=exchange.getRequestURI();
 			String theCommand=command.toString();
-
 
 			System.out.println("    Command received: " + theCommand);
 			String[] params=theCommand.split("/",2);
@@ -482,7 +490,6 @@ public class MainServer
 			
 			OutputStreamWriter sendBack= new OutputStreamWriter(exchange.getResponseBody());
 
-			
 			String file = "HTML/" + File.separator + path;
 			Scanner scanner = null;
 			try{
@@ -510,19 +517,24 @@ public class MainServer
 			sendBack.close();
 		}
 	};
-	
-	
-	
+
 	private void sendOutData(Object obj, HttpExchange exchange)
 	{
 		try
 		{
-			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
-			
-			OutputStreamWriter sendBack= new OutputStreamWriter(exchange.getResponseBody(), Charset.forName("UTF-8"));
-			String json = gson.toJson(obj);
-			sendBack.write(json); 
-			sendBack.close();
+			if (obj != null)
+			{
+				exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+
+				OutputStreamWriter sendBack = new OutputStreamWriter(exchange.getResponseBody(), Charset.forName("UTF-8"));
+				String json = gson.toJson(obj);
+				sendBack.write(json);
+				sendBack.close();
+			}
+			else
+			{
+				exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, -1);
+			}
 		}
 		catch(IOException e)
 		{
@@ -541,12 +553,13 @@ public class MainServer
         return out.toString();
     }
 	
-	private JsonObject makeEMessage(String message)
+	private JsonObject makeMessage(String message)
 	{
 		JsonObject obj = new JsonObject();
-		obj.addProperty("emessage",message);
+		obj.addProperty("message",message);
 		return obj;
 	}
+
 	private static boolean isNumeric(String str)  
 	{  
 	  try  

@@ -6,7 +6,7 @@
         <title> Family Map app Server </title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-	
+
         <link rel="apple-touch-icon" href="apple-touch-icon.png">
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 	<link rel="icon" href="/favicon.ico" type="image/x-icon">
@@ -35,14 +35,11 @@
                 obj.onreadystatechange = function()
                 {
                     document.getElementById("response").value = formatJson(obj.responseText);
-                }; 
+                };
                 obj.open(method,path,false);
                 obj.setRequestHeader("Content-Type", "application/json");
                 obj.setRequestHeader("Authorization", token);
                 obj.send(params);
-
-
-
             }
 
             function formatJson(inputText)
@@ -92,16 +89,6 @@
                 return temp;
             }
 
-            function fillEvent(input)
-            {
-                document.getElementById("handleBox").value = "/event/" + input;
-                document.getElementById("requestBox").value = "";
-            }
-            function fill()
-            {
-                document.getElementById("handleBox").value = "/fill/[replace with a user name]";
-                document.getElementById("requestBox").value = "";
-            }
             function login()
             {
                 document.getElementById("handleBox").value = "/user/login";
@@ -113,12 +100,36 @@
                 document.getElementById("requestBox").value = formatJson("{username:\"username\",password:\"password\"," +
                     "email:\"email\",firstname:\"firstname\",lastname:\"lastname\"}");
             }
-            function fillPerson(input)
+            function clear()
             {
-                document.getElementById("handleBox").value = "/person/" + input;
+                document.getElementById("handleBox").value = "/clear/";
                 document.getElementById("requestBox").value = "";
             }
-
+            function fill()
+            {
+                document.getElementById("handleBox").value = "/fill/[Replace_With_User_Name]";
+                document.getElementById("requestBox").value = "";
+            }
+            function getAllEvents()
+            {
+                document.getElementById("handleBox").value = "/event";
+                document.getElementById("requestBox").value = "";
+            }
+            function getSingleEvent()
+            {
+                document.getElementById("handleBox").value = "/event/[Replace_With_Event_ID]";
+                document.getElementById("requestBox").value = "";
+            }
+            function getAllPersons()
+            {
+                document.getElementById("handleBox").value = "/person";
+                document.getElementById("requestBox").value = "";
+            }
+            function getSinglePerson()
+            {
+                document.getElementById("handleBox").value = "/person/[Replace_With_Person_ID]";
+                document.getElementById("requestBox").value = "";
+            }
 
         </script>
     </head>
@@ -130,19 +141,19 @@
         <!-- Add your site or application content here -->
         <div>
             <h2>
-                <p>Hello world! This is the Family Map server used to power the Family Map Android App.</p>
+                <p>This is the Family Map server used to power the Family Map Android app.</p>
             </h2>
         </div>
         <div>
-            <h4>The RESTapi that will be used is listed below. Some of the handlers require a request body
-                 to be sent (namely login and register) while others require an Authorization token (received at login).
-                To view the JSON format required for "/login" and "/register" simply click on the below link and look in the request body.
-                To try out the handlers click on one. It will fill the boxes below with the bare bones data.
-                Edit the data as needed and click submit.</h4>
+            <h4>The web API that will be used is described below. Some of the APIs require a request body
+                 to be sent (namely "/login" and "/register"), while others require an Authorization token (received at login).
+                To view the JSON format required for "/login" and "/register" simply click on the link below and look in the request body.
+                To try out an API, click on its link below. It will fill the boxes below with the data to be sent with the request.
+                Edit the data as needed and click Submit.</h4>
             <ul>
                 <li>
-                    <a href="javascript:login()" >/user/login</a> Use this to log a user in. A request body must be supplied specifying the username and password.
-                    If authenticated an authorization token will be returned. Use this token on other handlers that require authorization. The return Json object contains
+                    <a href="javascript:login()" >/user/login</a> Use this to log in a user. A request body must be supplied specifying the username and password.
+                    If login succeeds, an authorization token will be returned. Use this token on other API calls that require authorization. The returned JSON object contains
                     "Authorization" (the authorization token) and "username" (the username that was just logged in).
                 </li>
                 <li>
@@ -150,31 +161,36 @@
                     token from login. Returns the same Json object as log in.
                 </li>
                 <li>
-                    <a href="javascript:fill()" >/fill/[username]/{generations}/{true}</a> This handle will fill the servers database with fake data. The username
-                    is required and can be any user name you choose. (Just remember to register with the same user name or the
-                    data created here wont be accessible). If there is any data in the database associated with the given user name it is erased.
-                    The "generations" is optional and says how many generations back you
-                    want the data to go; the default value is 5. Finally, the true is also optional and says whether or not to erase
-                    all the data in the entire database. The default value is false. The benefit here is if there are multiple users in the database you can reset a specific user, and not erase EVERY user and all their data from the database. This handle can be run from a browser
-                    (and probably should be) by simply typing it in the to address bar. No authorization token is required.
+                    <a href="javascript:clear()" >/clear</a> This API will clear ALL data from the database. No authorization token is required.
                 </li>
                 <li>
-                    <a href="javascript:fillEvent(new String (''));">/event/</a>  This handle will get ALL the events for ALL family members for a specific user. That is all the events for all the people
-                    who are associated with this user. This handle requires an authorization token and the user that is associated with that token will be the "specified user" mentioned above.
-                    The returning Json object contains "data" which is an array of event objects in Json format.
+                    <a href="javascript:fill()" >/fill/[username]/{generations}</a> This API will fill the server&apos;s database with fake data for the specified user name.
+                    The "username" parameter is required and can be any user name you choose.
+                    (Just remember to register with the same user name or the data created here will not be accessible).
+                    If there is any data in the database associated with the given user name, it is erased.
+                    The "generations" parameter is optional and indicates how many generations back you want the data to go; the default value is 5.
+                    This API can be run from a browser by simply typing it in the to address bar.
+                    No authorization token is required.
                 </li>
                 <li>
-                    <a href="javascript:fillEvent(new String('[Replace With an Event ID]'))">/event/[eventID]</a> This will get one specific event, that event specified by the ID. This still requires an
-                    authorization token. The returning json is an event object in json format.
+                    <a href="javascript:getAllEvents()">/event</a> This API will return ALL events for ALL family members of the current user.
+                    The current user is determined from the provided authorization token (which is required for this call).
+                    The returned JSON object contains "data" which is an array of event objects.
                 </li>
                 <li>
-                    <a href="javascript:fillPerson(new String(''))" >/person/</a> This will return all the people that are associated with the username who's token was provided. That is
-                    to say that a token is required, and all the people in the server who were filled with that user name's token
-                    will be returned. The returning Json object contains "data" which is an array of person objects in Json format.
+                    <a href="javascript:getSingleEvent()">/event/[eventID]</a> This API will return the single event with the specified ID.
+                    This call requires an authorization token.
+                    The returned JSON contains the requested event object.
                 </li>
                 <li>
-                    <a href="javascript:fillPerson(new String('[Replace_With_a_Person_ID]'))" >/person/[personID]</a> This will return a specific person based on the personID listed. An authorization token
-                    is required. The returning json is a person object in json format.
+                    <a href="javascript:getAllPersons()" >/person</a> This API will return ALL people associated with the current user.
+                    The current user is determined from the provided authorization token (which is required for this call).
+                    The returned JSON object contains "data" which is an array of person objects.
+                </li>
+                <li>
+                    <a href="javascript:getSinglePerson()" >/person/[personID]</a> This API will return the single person with the specified ID.
+                    This call requires an authorization token.
+                    The returned JSON contains the requested person object.
                 </li>
             </ul>
         </div>
@@ -182,12 +198,16 @@
                 A few notes:
                 <ul>
                     <li>
-                        The authorization token must be placed in the header "Authorization" and the token is returned under the tag
-                        "Authorization" when logging in or registering.
+                        The authorization token is returned from the server in the "Authorization"
+                        attribute of the JSON object returned by the "/user/register" and "/user/login" APIs.
+                        The authorization token must be placed in the "Authorization" header
+                        on all subsequent HTTP requests.
                     </li>
                     <li>
-                        If something fails a json is returned with the tag "emessage". Watch for these as they will give helpful
-                        insight into why the server didn't work as expected.
+                        If something fails, the returned JSON object contains a "message" attribute
+                        which contains a message describing what happened.
+                        Watch for these as they will give helpful insight into why the server did not
+                        work as expected.
                     </li>
                 </ul>
             </h5>
