@@ -109,10 +109,10 @@ public class ServerFacade
 		return person;
 	}
 	
-	//THE api says return all the decendents but each person holds only ONE decendent so thats
+	//THE api says return all the decendants but each person holds only ONE decendent so thats
 	//what is returned
 /*	@Deprecated
-	public Person getDescendent (String personID)
+	public Person getDescendant (String personID)
 	{
 		DataBase db = new DataBase();
 		Person person = null;
@@ -120,7 +120,7 @@ public class ServerFacade
 		try
 		{
 			person = db.personTable.getPersonByID(personID);
-			person = db.personTable.getPersonByID(person.descendent);
+			person = db.personTable.getPersonByID(person.descendant);
 			db.closeTransaction(true);
 		}
 		catch(SQLException e)

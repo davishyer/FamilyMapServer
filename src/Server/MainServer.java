@@ -53,7 +53,7 @@ public class MainServer
 		if(args.length < 1)
 		{
 			System.out.println("More arguments needed. Please specify the port number and optionally"
-					+ " the default number of max generations that are allowed on the fill handle."
+					+ " the default number of max generations that are allowed on the /fill/ endpoint."
 					+ " eg: SERVER.JAR 8080 5");
 		}
 		else
@@ -68,13 +68,13 @@ public class MainServer
 			File htmlF = new File("HTML");
 			if(!htmlF.exists()) 
 			{
-				System.out.println("The HTML folder is missing. The server can not run with out it. Shutting down!");
+				System.out.println("The HTML folder is missing. The server cannot run without it. Shutting down!");
 				return;
 			}
 			File dataF = new File("data");
 			if(!dataF.exists()) 
 			{
-				System.out.println("The data folder is missing. The server can not run with out it. Shutting down!");
+				System.out.println("The data folder is missing. The server cannot run without it. Shutting down!");
 				return;
 			}
 			
@@ -91,9 +91,9 @@ public class MainServer
 			server = HttpServer.create(
 					new InetSocketAddress(SERVER_PORT_NUMBER), MAX_WAITING_CONNECTION);
 			
-			String probableAddress = "Couldn't find a likly choice";
+			String probableAddress = "Could not find a likely choice";
 			Enumeration e = NetworkInterface.getNetworkInterfaces();
-			System.out.println("This machine is attatched to the following IP addresses:");
+			System.out.println("This machine is attached to the following IP addresses:");
 			while(e.hasMoreElements())
 			{
 			    NetworkInterface n = (NetworkInterface) e.nextElement();
@@ -139,11 +139,11 @@ public class MainServer
 		public void handle(HttpExchange exchange)
 		{
 			Calendar cal = Calendar.getInstance();
-			System.out.println("Fill Handle was just called at " + dateFormat.format(cal.getTime()));
+			System.out.println("Fill endpoint was just called at " + dateFormat.format(cal.getTime()));
 			URI command=exchange.getRequestURI();
 			String theCommand=command.toString();
 			
-			System.out.println("    Received handle: " + theCommand);
+			System.out.println("    Received URI: " + theCommand);
 
 			String[] params=theCommand.split("/");
 			
@@ -152,7 +152,7 @@ public class MainServer
 			
 			if(params.length <= 2)
 			{
-				sendOutData(makeEMessage("Failed. Please specifiy a user. Example: /fill/[USERNAME]"), exchange);
+				sendOutData(makeEMessage("Failed. Please specify a user. Example: /fill/[USERNAME]"), exchange);
 				return;
 			}
 			
@@ -198,11 +198,11 @@ public class MainServer
 		public void handle(HttpExchange exchange) throws IOException 
 		{
 			Calendar cal = Calendar.getInstance();
-			System.out.println("Person Handle was just called at " + dateFormat.format(cal.getTime()));
+			System.out.println("Person endpoint was just called at " + dateFormat.format(cal.getTime()));
 			URI command=exchange.getRequestURI();
 			String theCommand=command.toString();
 			
-			System.out.println("    Received handle: " + theCommand);
+			System.out.println("    Received URI: " + theCommand);
 
 			String[] params=theCommand.split("/");
 			String token = exchange.getRequestHeaders().getFirst("Authorization");
@@ -232,12 +232,12 @@ public class MainServer
 					Person person = facade.getPersonByID(params[2], user.username);
 					if(person == null)
 						sendOutData(makeEMessage("No one here by that ID number or incorrect token "
-								+ "(the token provided doesn't match the requested persons descendant"), exchange);
+								+ "(the token provided does not match the requested persons descendant"), exchange);
 					else
 						sendOutData(person, exchange);
 				}
 				else
-					sendOutData(makeEMessage("Badly formed url. EG: address:port/person/"), exchange);
+					sendOutData(makeEMessage("Badly formed URI. EG: address:port/person/"), exchange);
 			}
 			else
 				sendOutData(makeEMessage("Not authenticated access token"), exchange);
@@ -251,15 +251,15 @@ public class MainServer
 		public void handle(HttpExchange exchange) throws IOException 
 		{
 			Calendar cal = Calendar.getInstance();
-			System.out.println("Event Handle was just called at " + dateFormat.format(cal.getTime()));
+			System.out.println("Event endpoint was just called at " + dateFormat.format(cal.getTime()));
 			URI command=exchange.getRequestURI();
 			String theCommand=command.toString();
 
-			System.out.println("    Handle was: " + theCommand);
+			System.out.println("    URI was: " + theCommand);
 			String[] params=theCommand.split("/");
 			
 			if(params.length < 2)
-				sendOutData(makeEMessage("Please specifiy more info (event OR person OR fill OR users)"), exchange);
+				sendOutData(makeEMessage("Please specify more info (event OR person OR fill OR users)"), exchange);
 			else
 			{
 				String token = exchange.getRequestHeaders().getFirst("Authorization");
@@ -276,14 +276,14 @@ public class MainServer
 						Event event = facade.getEventByID(params[2], user.username);
 						if(event == null)
 							sendOutData(makeEMessage("No event found by that id number or incorrect token "
-								+ "(the token provided doesn't match the requested event's descendant, a.k.a. you are tring to "
-								+ "get someone else's families events.)"), exchange);
+								+ "(the token provided does not match the requested event's descendant, a.k.a. you are trying to "
+								+ "get someone else's family events.)"), exchange);
 						else
 							sendOutData(event, exchange);
 					}
 					else if (params.length > 3)
 					{
-						sendOutData(makeEMessage("Badly formed url. EG: address:port/event/"), exchange);
+						sendOutData(makeEMessage("Badly formed URI. EG: address:port/event/"), exchange);
 					}
 					else
 					{
@@ -310,7 +310,7 @@ public class MainServer
 		public void handle(HttpExchange exchange)
 		{
 			Calendar cal = Calendar.getInstance();
-			System.out.println("Users Handle was just called at " + dateFormat.format(cal.getTime()));
+			System.out.println("Users endpoint was just called at " + dateFormat.format(cal.getTime()));
 			URI command=exchange.getRequestURI();
 			String theCommand=command.toString();
 
@@ -359,7 +359,7 @@ public class MainServer
 						}
 						else
 						{
-							sendOutData(makeEMessage("User name or password are wrong"), exchange);
+							sendOutData(makeEMessage("User name or password is wrong"), exchange);
 						}
 					}catch(IOException e)
 					{
@@ -451,7 +451,7 @@ public class MainServer
 		public void handle(HttpExchange exchange) throws IOException 
 		{
 			Calendar cal = Calendar.getInstance();
-			System.out.println("Index Handle was just called at " + dateFormat.format(cal.getTime()));
+			System.out.println("Index endpoint was just called at " + dateFormat.format(cal.getTime()));
 			Headers head=exchange.getResponseHeaders();
 			//head.set("Content-Type", "text/html");
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
@@ -559,6 +559,5 @@ public class MainServer
 	  }  
 	  return true;  
 	}
-	
-	
+
 }

@@ -2,7 +2,7 @@ package model;
 
 public class Person 
 {
-	public String descendant; //username of associasted descendent
+	public String descendant; //username of associated descendant
     public String personID; //unique id
     public String firstName;
     public String lastName;

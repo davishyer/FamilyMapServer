@@ -84,7 +84,7 @@ public class DBAccessPersons
 			while(rs.next())
 			{
 				person = new Person();
-				person.descendant = rs.getString(1); //username of associasted descendent
+				person.descendant = rs.getString(1); //username of associated descendant
 			    person.personID = rs.getString(2); //unique id
 			    person.firstName = rs.getString(3);
 			    person.lastName = rs.getString(4);
@@ -125,7 +125,7 @@ public class DBAccessPersons
 			while(rs.next())
 			{
 				Person person = new Person();
-				person.descendant = rs.getString(1); //username of associasted descendent
+				person.descendant = rs.getString(1); //username of associated descendant
 			    person.personID = rs.getString(2); //unique id
 			    person.firstName = rs.getString(3);
 			    person.lastName = rs.getString(4);

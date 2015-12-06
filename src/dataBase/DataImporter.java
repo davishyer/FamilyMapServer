@@ -107,7 +107,7 @@ public class DataImporter
 	private Person fillPerson(boolean male, int birthYear) throws SQLException
 	{
 		Person person = new Person();
-		person.descendant = username; //username of associasted descendent
+		person.descendant = username; //username of associated descendant
 	    person.personID = UUID.randomUUID().toString();
 	    
 	    if(male && Math.random() > 0.999)
