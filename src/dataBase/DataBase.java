@@ -154,7 +154,9 @@ public class DataBase
 				"email varchar(64),"+
 				"firstName varchar(64),"+
 				"lastName varchar(64),"+
-				"token varchar(64)"+
+				"token varchar(64),"+
+				"gender varchar(10),"+
+				"personId varchar(64)"+
 				");";
 
 			PreparedStatement stmt5 = this.connection.prepareStatement(sql3);
@@ -206,7 +208,9 @@ public class DataBase
 				"email varchar(64),"+
 				"firstName varchar(64),"+
 				"lastName varchar(64),"+
-				"token varchar(64)"+
+				"token varchar(64),"+
+				"gender varchar(10),"+
+				"personId varchar(64)"+
 				");";
 
 		if(dropUserTable)

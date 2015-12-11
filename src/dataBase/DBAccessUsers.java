@@ -22,10 +22,10 @@ public class DBAccessUsers
 		PreparedStatement stmt = null;
 	    ResultSet keyRS = null;
 		String sql = "insert into users (username, password, email, firstName, "
-				+ "lastName, token) values (?, ?, ?, ?, ?, ?)";
+				+ "lastName, token, gender, personId) values (?, ?, ?, ?, ?, ?, ?, ?)";
 		boolean success = false;
 		try
-		{			
+		{		
 			stmt = db.connection.prepareStatement(sql);
 			stmt.setString(1, user.username);
 			stmt.setString(2, user.password);
@@ -33,6 +33,8 @@ public class DBAccessUsers
 			stmt.setString(4, user.firstName);
 			stmt.setString(5, user.lastName);
 			stmt.setString(6, makeToken());
+			stmt.setString(7, user.gender);
+			stmt.setString(8, user.personId);
 
 			
 			if(stmt.executeUpdate() == 1)
@@ -134,6 +136,8 @@ public class DBAccessUsers
 				readUser.firstName = rs.getString(4);
 				readUser.lastName = rs.getString(5);
 				readUser.token = rs.getString(6);
+				readUser.gender = rs.getString(7);
+				readUser.personId = rs.getString(8);
 			}					
 		}
 		catch(SQLException e)
@@ -170,6 +174,8 @@ public class DBAccessUsers
 				readUser.firstName = rs.getString(4);
 				readUser.lastName = rs.getString(5);
 				readUser.token = rs.getString(6);
+				readUser.gender = rs.getString(7);
+				readUser.personId = rs.getString(8);
 			}					
 		}
 		catch(SQLException e)

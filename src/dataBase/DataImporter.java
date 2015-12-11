@@ -13,11 +13,12 @@ import java.util.UUID;
 
 import model.Event;
 import model.Person;
+import model.RunImportReturnObj;
+import model.User;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-
 
 public class DataImporter 
 {
@@ -31,7 +32,7 @@ public class DataImporter
 	int eventsAdded = 0;
 	DataBase db = new DataBase();
 	
-	public String runImport(String username, int level)
+	public RunImportReturnObj runImport(String username, int level)
 	{
 		this.username = username;
 		
@@ -55,28 +56,40 @@ public class DataImporter
 				db.closeTransaction(true);
 				
 				db.startTransaction();
-				fill();
-				fillTree(fillPerson(true, (int)(Math.random() * 500) + 1500), level);
+				setUpSpecialCharacters();
+				
+				//Make the root of the tree be the user that is logged in
+				User user = db.usersTable.getUserByUserName(username);
+				if(user == null) //the user isnt registered yet
+				{
+					db.closeTransaction(false);
+					return new RunImportReturnObj("The supplied user is not yet registered. Please register the user first", false);
+				}
+				Person thePerson = new Person();
+				thePerson.fillBasedOnUser(user);
+				fillEvents(thePerson, (int)(Math.random() * 500) + 1500);
+				
+				//start the normal filling process (this will add the current user's person object to the DB)
+				fillTree(thePerson, level);
 				db.closeTransaction(true);
-				return "Successfully added " + String.valueOf(personsAdded) + " persons and " +
-					String.valueOf(eventsAdded) + " events to the database. Dont forget to register the supplied "
-							+ "user name if you havent already";
+				return new RunImportReturnObj("Successfully added " + String.valueOf(personsAdded) + " persons and " +
+					String.valueOf(eventsAdded) + " events to the database.", true);
 			}
 			catch (Exception e)
 			{
 				e.printStackTrace();
 				db.closeTransaction(false);
-				return "There was an error loading the DB. Error message: " + e.getMessage();
+				return new RunImportReturnObj("There was an error loading the DB. Error message: " + e.getMessage(), false);
 			}
 			
 		}
-		return "Failed: One of the data files for importing could not be loaded. Missing/Corrupt?";
+		return new RunImportReturnObj("Failed: One of the data files for importing could not be loaded. Missing/Corrupt?", false);
 	}
 
 	
 	private Person fillTree(Person child, int levelsToGo) throws SQLException
 	{
-		if(levelsToGo <= 0)
+		if(levelsToGo <= 0) //base case for the recursion
 		{
 			db.personTable.addPerson(child);
 			personsAdded++;
@@ -276,7 +289,7 @@ public class DataImporter
 	Event GWDeath;
 	boolean GWA = false;
 	boolean ALA = false;
-	private void fill()
+	private void setUpSpecialCharacters()
 	{
 		Abe = new Person();
 		Abe.descendant = username;

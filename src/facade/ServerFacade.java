@@ -4,12 +4,16 @@ import java.sql.SQLException;
 import java.util.List;
 
 import dataBase.DataBase;
+import dataBase.DataImporter;
 import model.Event;
 import model.Person;
 import model.User;
 
 public class ServerFacade 
 {
+	
+	private static int MAX_GENERATIONS = 5;
+	
 	public List<Person> getUserNamesFamily(String username)
 	{
 		DataBase db = new DataBase();
@@ -109,73 +113,6 @@ public class ServerFacade
 		return person;
 	}
 	
-	//THE api says return all the decendants but each person holds only ONE decendent so thats
-	//what is returned
-/*	@Deprecated
-	public Person getDescendant (String personID)
-	{
-		DataBase db = new DataBase();
-		Person person = null;
-		db.startTransaction();
-		try
-		{
-			person = db.personTable.getPersonByID(personID);
-			person = db.personTable.getPersonByID(person.descendant);
-			db.closeTransaction(true);
-		}
-		catch(SQLException e)
-		{
-			e.printStackTrace();
-			db.closeTransaction(false);
-		}
-		
-		return person;
-	}*/
-	
-/*	public List<Person> getAncestorsOfUserName(String username)
-	{
-		DataBase db = new DataBase();
-		Person person = null;
-		List<Person> persons = null;
-		db.startTransaction();
-		try
-		{
-			person = db.personTable.getPersonByID(username);
-			persons = getAncestorsRecursive(person,db);
-			db.closeTransaction(true);		
-		}
-		catch(SQLException e)
-		{
-			e.printStackTrace();
-			db.closeTransaction(false);
-		}	
-		
-		return persons;
-	}*/
-	
-/*	private List<Person> getAncestorsRecursive(Person person, DataBase db) throws SQLException
-	{
-		if(person == null)
-			return null;
-		List<Person> persons = new ArrayList<Person>();
-		
-		persons.add(person);
-		
-		Person father = db.personTable.getPersonByID(person.father);
-		Person mother = db.personTable.getPersonByID(person.mother);
-		
-		List<Person> fatherSide = getAncestorsRecursive(father,db);
-		List<Person> motherSide = getAncestorsRecursive(mother,db);
-		
-		if(fatherSide != null)
-			persons.addAll(fatherSide);
-		
-		if(motherSide != null)
-			persons.addAll(motherSide);
-		
-		return persons;
-	}*/
-	
 	public boolean regesterUser(User user)
 	{
 		DataBase db = new DataBase();
@@ -183,8 +120,18 @@ public class ServerFacade
 		db.startTransaction();
 		try
 		{
-			success = db.usersTable.regesterUser(user);
+			//Add the registered user to the database, thus getting a person ID
+			Person person = new Person();
+			person.fillBasedOnUser(user);//here is where the personId is assigned
+			user.personId = person.personID;
+			
+			success = db.usersTable.regesterUser(user); 
+			//now that user is in the user table and has a personId
 			db.closeTransaction(true);
+			
+			//transactions are automatically handled by the DataImporter
+			success = new DataImporter().runImport(user.username, MAX_GENERATIONS).status;
+
 		}
 		catch(SQLException e)
 		{
@@ -312,24 +259,5 @@ public class ServerFacade
 		}
 		return true;
 	}
-	
-	/*
-
-Search Persons 
-POST( /api/search/persons username,query )
-
-	This retrieves all persons with a name similar to the specified query.
-
-Search Events 
-POST( /api/search/events username,query )
-
-This retrieves all events with a city or country similar to the specified query.
-
-Search Persons and Events 
-POST( /api/search username,query )
-
-	This retrieves all persons with a name similar to the specified query and all events with a city or country similar to the specified query.
-	 */
-
 
 }

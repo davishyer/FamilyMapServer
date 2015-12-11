@@ -8,4 +8,6 @@ public class User
 	public String firstName;
 	public String lastName;
 	public String token;
+	public String gender;
+	public String personId;
 }

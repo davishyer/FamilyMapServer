@@ -7,14 +7,13 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <link rel="apple-touch-icon" href="apple-touch-icon.png">
 	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 	<link rel="icon" href="/favicon.ico" type="image/x-icon">
         <!-- Place favicon.ico in the root directory -->
 
 <!--        <link rel="stylesheet" href="css/normalize.css">    -->
         <link rel="stylesheet" href="css/main.css">
-        <script src="js/vendor/modernizr-2.8.3.min.js"></script>
+   <!--     <script src="js/vendor/modernizr-2.8.3.min.js"></script> -->
 
         <script type="text/javascript">
 
@@ -98,7 +97,7 @@
             {
                 document.getElementById("handleBox").value = "/user/register";
                 document.getElementById("requestBox").value = formatJson("{username:\"username\",password:\"password\"," +
-                    "email:\"email\",firstname:\"firstname\",lastname:\"lastname\"}");
+                    "email:\"email\",firstname:\"firstname\",lastname:\"lastname\", gender:\"m/f\"}");
             }
             function clear()
             {
@@ -112,7 +111,7 @@
             }
             function getAllEvents()
             {
-                document.getElementById("handleBox").value = "/event";
+                document.getElementById("handleBox").value = "/event/";
                 document.getElementById("requestBox").value = "";
             }
             function getSingleEvent()
@@ -122,7 +121,7 @@
             }
             function getAllPersons()
             {
-                document.getElementById("handleBox").value = "/person";
+                document.getElementById("handleBox").value = "/person/";
                 document.getElementById("requestBox").value = "";
             }
             function getSinglePerson()
@@ -134,11 +133,6 @@
         </script>
     </head>
     <body>
-        <!--[if lt IE 8]>
-            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-        <![endif]-->
-
-        <!-- Add your site or application content here -->
         <div>
             <h2>
                 <p>This is the Family Map server used to power the Family Map Android app.</p>
@@ -152,14 +146,13 @@
                 Edit the data as needed and click Submit.</h4>
             <ul>
                 <li>
-                    <a href="javascript:clear()" >/clear</a> This API will clear ALL data from the database, including users and all generated data.
-                    This API can be run from a browser by simply typing it in the address bar.
+                    <a href="javascript:clear()" >/clear/</a> This API will clear ALL data from the database, including users and all generated data.
+                    This API can be run from a browser by simply typing it in the address bar or by clicking this link followed by pressing the Submit button below.
                     No authorization token is required.
                 </li>
                 <li>
                     <a href="javascript:fill()" >/fill/[username]/{generations}</a> This API will fill the server&apos;s database with fake data for the specified user name.
-                    The "username" parameter is required and can be any user name you choose.
-                    (Just remember to register with the same user name or the data created here will not be accessible).
+                    The "username" parameter is required and must be a user already registered with the server. It can be any user name you choose.
                     If there is any data in the database associated with the given user name, it is erased.
                     The "generations" parameter is optional and indicates how many generations back you want the data to go; the default value is 5.
                     This API can be run from a browser by simply typing it in the address bar.
@@ -173,10 +166,11 @@
                 </li>
                 <li>
                     <a href="javascript:register()" >/user/register</a> Use this to register a user. An authorization token is returned. Use it just as you would a
-                    token from login. Returns the same Json object as log in.
+                    token from login. Returns the same Json object as log in. It should be noted that when you register a user the database will automatically be filled. 
+		    (Meaning you do not need to call the /fill API noted above).
                 </li>
                 <li>
-                    <a href="javascript:getAllEvents()">/event</a> This API will return ALL events for ALL family members of the current user.
+                    <a href="javascript:getAllEvents()">/event/</a> This API will return ALL events for ALL family members of the current user.
                     The current user is determined from the provided authorization token (which is required for this call).
                     The returned JSON object contains "data" which is an array of event objects.
                 </li>
@@ -186,7 +180,7 @@
                     The returned JSON contains the requested event object.
                 </li>
                 <li>
-                    <a href="javascript:getAllPersons()" >/person</a> This API will return ALL people associated with the current user.
+                    <a href="javascript:getAllPersons()" >/person/</a> This API will return ALL people associated with the current user.
                     The current user is determined from the provided authorization token (which is required for this call).
                     The returned JSON object contains "data" which is an array of person objects.
                 </li>
@@ -225,10 +219,10 @@
             Response From the server: <textarea type="text" id="response" class="responseBody"></textarea>
         </div>
 
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+       <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
         <script src="js/plugins.js"></script>
         <script src="js/main.js"></script>
-
+-->
     </body>
 </html>

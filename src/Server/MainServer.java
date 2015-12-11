@@ -40,7 +40,7 @@ import dataBase.DataImporter;
 public class MainServer 
 {
 	private static final int MAX_WAITING_CONNECTION = 10;
-	private static int MAX_GENERATIONS = 5;
+	private static int MAX_GENERATIONS = 5; //this number is also in ServerFacade.
 	private HttpServer server;
 	private static int SERVER_PORT_NUMBER;
 	private ServerFacade facade;
@@ -195,7 +195,7 @@ public class MainServer
 				}
 			}
 
-			String report = new DataImporter().runImport(params[2], levels);							
+			String report = new DataImporter().runImport(params[2], levels).message;							
 			sendOutData(report, exchange);
 		}
 		
@@ -241,7 +241,7 @@ public class MainServer
 					Person person = facade.getPersonByID(params[2], user.username);
 					if(person == null)
 						sendOutData(makeMessage("No one here by that ID number or incorrect token "
-								+ "(the token provided does not match the requested persons descendant"), exchange);
+								+ "(the token provided does not match the requested person's descendant)"), exchange);
 					else
 						sendOutData(person, exchange);
 				}
@@ -364,6 +364,7 @@ public class MainServer
 							AuthToken token = new AuthToken();
 							token.userName = user.username;
 							token.Authorization = user.token;
+							token.personId = user.personId;
 							sendOutData(token, exchange);
 						}
 						else
@@ -428,6 +429,23 @@ public class MainServer
 							return;
 						}
 						
+						if(json != null && json.has("gender"))
+						{
+							String gender = json.get("gender").getAsString().toLowerCase();
+							if(gender.equals("m") || gender.equals("f"))
+								user.gender = gender;
+							else
+							{
+								sendOutData(makeMessage("Gender must be either m or f"), exchange);
+								return;
+							}
+						}
+						else
+						{
+							sendOutData(makeMessage("Missing gender in post body"), exchange);
+							return;
+						}
+						
 						if(facade.duplicateNameFound(user.username))
 						{
 							sendOutData(makeMessage("User name already taken. Try a different user name"), exchange);
@@ -438,6 +456,7 @@ public class MainServer
 							AuthToken token = new AuthToken();
 							token.userName = user.username;
 							token.Authorization = user.token;
+							token.personId = user.personId;
 							sendOutData(token, exchange);
 						}
 						else
@@ -463,7 +482,7 @@ public class MainServer
 			System.out.println("Index API was just called at " + dateFormat.format(cal.getTime()));
 			Headers head=exchange.getResponseHeaders();
 			//head.set("Content-Type", "text/html");
-			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+			
 			
 			URI command=exchange.getRequestURI();
 			String theCommand=command.toString();
@@ -484,9 +503,14 @@ public class MainServer
 				{
 					head.set("Content-Type", "text/css");
 				}
+				else if(theCommand.split("/")[1].equals("img"))
+				{
+					head.set("Content-Type", "image/png");
+				}
 				else
 					head.set("Content-Type", "text/html");
 			}
+			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
 			
 			OutputStreamWriter sendBack= new OutputStreamWriter(exchange.getResponseBody());
 
