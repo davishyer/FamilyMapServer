@@ -5,7 +5,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import model.Person;
 
@@ -28,7 +27,10 @@ public class DBAccessPersons
 						+ " values (?, ?, ?, ?, ?, ?, ?, ?)";
 		
 		if(person.personID == null)
-			person.personID = UUID.randomUUID().toString(); //unique id
+		{
+			MyRandomGenerator rand = MyRandomGenerator.getInstance();
+			person.personID = rand.randomUUID(); //unique id
+		}
 		
 		try
 		{

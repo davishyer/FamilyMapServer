@@ -1,6 +1,7 @@
 package model;
 
-import java.util.UUID;
+
+import dataBase.MyRandomGenerator;
 
 public class Person 
 {
@@ -16,7 +17,8 @@ public class Person
     public void fillBasedOnUser(User user) 
     {
     	descendant = user.username; //user name of associated descendant
-	    personID = user.personId == null ? UUID.randomUUID().toString() : user.personId;
+    	MyRandomGenerator rand = MyRandomGenerator.getInstance();
+	    personID = user.personId == null ? rand.randomUUID() : user.personId;
 	    firstName = user.firstName;
 	    lastName = user.lastName;
 		gender = user.gender;

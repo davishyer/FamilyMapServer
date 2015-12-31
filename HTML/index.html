@@ -104,9 +104,12 @@
                 document.getElementById("handleBox").value = "/clear/";
                 document.getElementById("requestBox").value = "";
             }
-            function fill()
+            function fill(includeOptions)
             {
-                document.getElementById("handleBox").value = "/fill/[Replace_With_User_Name]";
+		var api = "/fill/[Replace_With_User_Name]";
+		if(includeOptions)
+			api += "?seed=N&generations=M";
+                document.getElementById("handleBox").value = api;
                 document.getElementById("requestBox").value = "";
             }
             function getAllEvents()
@@ -151,14 +154,18 @@
                     No authorization token is required.
                 </li>
                 <li>
-                    <a href="javascript:fill()" >/fill/[username]/{generations}</a> This API will fill the server&apos;s database with fake data for the specified user name.
+                    <a href="javascript:fill()" >/fill/[username]</a> This API will fill the server&apos;s database with fake data for the specified user name.
                     The "username" parameter is required and must be a user already registered with the server. It can be any user name you choose.
                     If there is any data in the database associated with the given user name, it is erased.
-                    The "generations" parameter is optional and indicates how many generations back you want the data to go; the default value is 5.
-                    This API can be run from a browser by simply typing it in the address bar.
+                    This API can be run from a browser by simply typing it in the address bar (or by pressing the link, filling in the details, and clicking submit).
                     No authorization token is required.
-                    <p></p>
                 </li>
+                <li>
+                    <a href="javascript:fill('true')" >/fill/[username]?seed=N&generations=M</a> This API does the same as the fill API, and still requires the username parameter, but has two additional options. The seed option will set the seed for the random data generator, thus allowing pseudo random data to be generated, and JUnit tests to be run. The generations option indicates how many generations back you want to the data to go; the default value is 5. Either the seed option, generations option or both options can be used.
+                    This API can be run from a browser by simply typing it in the address bar (or by pressing the link, filling in the details, and clicking submit).
+                    No authorization token is required.
+                </li>
+                <p></p>
                 <li>
                     <a href="javascript:login()" >/user/login</a> Use this to log in a user. A request body must be supplied specifying the username and password.
                     If login succeeds, an authorization token will be returned. Use this token on other API calls that require authorization. The returned JSON object contains
@@ -218,11 +225,5 @@
         <div>
             Response From the server: <textarea type="text" id="response" class="responseBody"></textarea>
         </div>
-
-       <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
-        <script src="js/plugins.js"></script>
-        <script src="js/main.js"></script>
--->
     </body>
 </html>

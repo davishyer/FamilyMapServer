@@ -8,8 +8,6 @@ import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
-import java.util.UUID;
 
 import model.Event;
 import model.Person;
@@ -31,9 +29,16 @@ public class DataImporter
 	int personsAdded = 0;
 	int eventsAdded = 0;
 	DataBase db = new DataBase();
+	MyRandomGenerator rand;
 	
-	public RunImportReturnObj runImport(String username, int level)
+	public RunImportReturnObj runImport(String username, int level, Integer seed)
 	{
+		rand = MyRandomGenerator.getInstance();
+		if(seed == null)
+			rand.setSeed((int) System.nanoTime());
+		else
+			rand.setSeed(seed);
+		
 		this.username = username;
 		
 		String fnames = "data" + File.separator + "fnames.json";
@@ -67,7 +72,7 @@ public class DataImporter
 				}
 				Person thePerson = new Person();
 				thePerson.fillBasedOnUser(user);
-				fillEvents(thePerson, (int)(Math.random() * 500) + 1500);
+				fillEvents(thePerson, (int)(rand.nextDouble() * 500) + 1500);
 				
 				//start the normal filling process (this will add the current user's person object to the DB)
 				fillTree(thePerson, level);
@@ -98,7 +103,7 @@ public class DataImporter
 		
 		levelsToGo--;
 		
-		int birthYear = (int)(Math.random() * 500) + 1500;
+		int birthYear = (int)(rand.nextDouble() * 500) + 1500;
 		Person father = fillPerson(true, birthYear);
 		Person mother = fillPerson(false, birthYear);
 
@@ -121,11 +126,11 @@ public class DataImporter
 	{
 		Person person = new Person();
 		person.descendant = username; //username of associated descendant
-	    person.personID = UUID.randomUUID().toString();
+	    person.personID = rand.randomUUID();
 	    
-	    if(male && Math.random() > 0.999)
+	    if(male && rand.nextDouble() > 0.999)
 	    {
-	    	if(Math.random() > 0.5 && !GWA)
+	    	if((rand.nextDouble() > 0.5 && !GWA) || ALA)
 	    	{
 	    		db.eventsTable.addEvent(GWBirth);
 	    	    eventsAdded++;
@@ -147,16 +152,16 @@ public class DataImporter
 	    
 	    if(male)
 	    {
-	    	person.firstName = (mNamesArray.get((int)(Math.random() * mNamesArray.size()))).getAsString();
+	    	person.firstName = (mNamesArray.get((int)(rand.nextDouble() * mNamesArray.size()))).getAsString();
 	    	person.gender = "m";
 	    }
 	    else
 	    {
-	    	person.firstName = (fNamesArray.get((int)(Math.random() * fNamesArray.size()))).getAsString();
+	    	person.firstName = (fNamesArray.get((int)(rand.nextDouble() * fNamesArray.size()))).getAsString();
 	    	person.gender = "f";  	
 	    }
 
-	    person.lastName = (sNamesArray.get((int)(Math.random() * sNamesArray.size()))).getAsString();
+	    person.lastName = (sNamesArray.get((int)(rand.nextDouble() * sNamesArray.size()))).getAsString();
 	    fillEvents(person, birthYear);
 
     	return person;
@@ -165,9 +170,8 @@ public class DataImporter
 	
 	private void fillEvents(Person person, int birthYearStart) throws SQLException
 	{
-		Random rand = new Random();
-		int birthYear = ((int)(Math.random() * 8) + birthYearStart) - 4;
-		int deathYear = birthYear + (int)(Math.random() * 75) + 20;
+		int birthYear = ((int)(rand.nextDouble() * 8) + birthYearStart) - 4;
+		int deathYear = birthYear + (int)(rand.nextDouble() * 75) + 20;
 		
 		int christening = rand.nextInt(deathYear - birthYear) + birthYear;
 		int baptism = rand.nextInt(deathYear - birthYear) + birthYear;
@@ -175,21 +179,21 @@ public class DataImporter
 		int caughtAToad = rand.nextInt(deathYear - birthYear) + birthYear;
 		int didABackFlip = rand.nextInt(deathYear - birthYear) + birthYear;
 		
-		if(Math.random() > (Math.abs(2020 - birthYear)/birthYear))
+		if(rand.nextDouble() > (Math.abs(2020 - birthYear)/birthYear))
 			makeEvent(person, "birth", birthYear);
-		if(Math.random() > (Math.abs(2020 - deathYear)/deathYear))
+		if(rand.nextDouble() > (Math.abs(2020 - deathYear)/deathYear))
 			makeEvent(person, "death", deathYear);
 		
-		if(Math.random() > (Math.abs(2020 - christening)/christening)*4.0)
+		if(rand.nextDouble() > (Math.abs(2020 - christening)/christening)*4.0)
 			makeEvent(person, "christening", christening);
-		if(Math.random() > (Math.abs(2020 - baptism)/baptism)*4.0)
+		if(rand.nextDouble() > (Math.abs(2020 - baptism)/baptism)*4.0)
 			makeEvent(person, "baptism", baptism);
-		if(Math.random() > (Math.abs(2020 - cenus)/cenus)*4.0)
+		if(rand.nextDouble() > (Math.abs(2020 - cenus)/cenus)*4.0)
 			makeEvent(person, "census", cenus);
 		
-		if(Math.random() > 0.999)
+		if(rand.nextDouble() > 0.999)
 			makeEvent(person, "caught a toad", caughtAToad);
-		if(Math.random() > 0.999)
+		if(rand.nextDouble() > 0.999)
 			makeEvent(person, "did a back flip", didABackFlip);
 	    
 	}
@@ -200,7 +204,7 @@ public class DataImporter
 		if(events != null && events.size() > 0)
 		{
 			Collections.sort(events);
-			int marriageYear = Integer.parseInt(events.get(0).year) + (int)(Math.random() * 5) + 18;
+			int marriageYear = Integer.parseInt(events.get(0).year) + (int)(rand.nextDouble() * 5) + 18;
 			if(events.get(0).description.contains("death")) //only event is death, and nothing else should come after
 			{
 				marriageYear =- 30;
@@ -210,7 +214,7 @@ public class DataImporter
 			Event marriage = makeEvent(father, "marriage", marriageYear);
 			
 			marriage.personID = mother.personID;
-			marriage.eventID = UUID.randomUUID().toString();
+			marriage.eventID = rand.randomUUID();
 			db.eventsTable.addEvent(marriage);
 			eventsAdded++;
 			
@@ -223,14 +227,14 @@ public class DataImporter
 	{
 		Event event = new Event();
 		event.descendant = username;
-		event.eventID = UUID.randomUUID().toString(); //unique ID
+		event.eventID = rand.randomUUID(); //unique ID
 	    event.personID = person.personID; //personID of associated person
 	    
 	    JsonObject location;
 	    do
 	    {
 		    location = locationsArray.get(
-		    		(int)(Math.random() * (locationsArray.size()-1))).getAsJsonObject();
+		    		(int)(rand.nextDouble() * (locationsArray.size()-1))).getAsJsonObject();
 	    }while(!location.has("longitude") || !location.has("latitude") || !location.has("country")
 	    		|| !location.has("city"));
 	    
@@ -299,14 +303,14 @@ public class DataImporter
 		Abe.lastName = "Lincoln";
 		Abe.firstName = "Abe";
 		Abe.spouse = null;
-		Abe.personID = UUID.randomUUID().toString();
+		Abe.personID = rand.randomUUID();
 		
 		abeBirth = new Event();
 		abeBirth.city = "Hodgenville";
 		abeBirth.country = "USA";
 		abeBirth.descendant = username;
 		abeBirth.description = "birth";
-		abeBirth.eventID = UUID.randomUUID().toString();
+		abeBirth.eventID = rand.randomUUID();
 		abeBirth.personID = Abe.personID;
 		abeBirth.latitude = 37.567404;
 		abeBirth.longitude = -85.738268;
@@ -317,7 +321,7 @@ public class DataImporter
 		abeDeath.country = "USA";
 		abeDeath.descendant = username;
 		abeDeath.description = "death";
-		abeDeath.eventID = UUID.randomUUID().toString();
+		abeDeath.eventID = rand.randomUUID();
 		abeDeath.personID = Abe.personID;
 		abeDeath.latitude = 38.897083;
 		abeDeath.longitude = -77.025332;
@@ -331,14 +335,14 @@ public class DataImporter
 		GW.lastName = "Washington";
 		GW.firstName = "George";
 		GW.spouse = null;
-		GW.personID = UUID.randomUUID().toString();
+		GW.personID = rand.randomUUID();
 		
 		GWBirth = new Event();
 		GWBirth.city = "Westmoreland";
 		GWBirth.country = "USA";
 		GWBirth.descendant = username;
 		GWBirth.description = "birth";
-		GWBirth.eventID = UUID.randomUUID().toString();
+		GWBirth.eventID = rand.randomUUID();
 		GWBirth.personID = GW.personID;
 		GWBirth.latitude = 38.184959;
 		GWBirth.longitude = -76.920331;
@@ -349,7 +353,7 @@ public class DataImporter
 		GWDeath.country = "USA";
 		GWDeath.descendant = username;
 		GWDeath.description = "death";
-		GWDeath.eventID = UUID.randomUUID().toString();
+		GWDeath.eventID = rand.randomUUID();
 		GWDeath.personID = GW.personID;
 		GWDeath.latitude = 38.708233;
 		GWDeath.longitude = -77.086143;

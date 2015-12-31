@@ -18,7 +18,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import model.AuthToken;
@@ -176,7 +178,7 @@ public class MainServer
 			System.out.println("    Received URI: " + theCommand);
 
 			String[] params=theCommand.split("/");
-
+			
 			int levels = MAX_GENERATIONS;
 			
 			if(params.length <= 2)
@@ -184,18 +186,49 @@ public class MainServer
 				sendOutData(makeMessage("Failed. Please specify a user. Example: /fill/[USERNAME]"), exchange);
 				return;
 			}
-			
-			if(params.length == 4 && isNumeric(params[3]))
+
+			Integer seed = null;
+			String queryString = exchange.getRequestURI().getQuery();
+			if(queryString != null)
 			{
-				levels = Integer.parseInt(params[3]);
-				if(levels > MAX_GENERATIONS)
+				Map<String, String> querys = queryToMap(queryString);
+				if(querys.containsKey("seed"))
 				{
-					sendOutData("Too many levels. Please pick a number below " + String.valueOf(MAX_GENERATIONS) + " for the number of levels", exchange);
-					return;
+					if(isNumeric(querys.get("seed")))
+					{
+						seed = new Integer(querys.get("seed"));
+						seed = Math.abs(seed);
+					}
+					else
+					{
+						sendOutData("The seed option needs to be a number", exchange);
+						return;
+					}
+						
+				}
+				if(querys.containsKey("generations"))
+				{
+					if(isNumeric(querys.get("generations")))
+					{
+						levels = Integer.parseInt(querys.get("generations"));
+						levels = Math.abs(levels);
+						if(levels > MAX_GENERATIONS)
+						{
+							sendOutData("Too many levels. Please pick a number below " + String.valueOf(MAX_GENERATIONS) + " for the number of levels", exchange);
+							return;
+						}
+					}
+					else
+					{
+						sendOutData("The generations option needs to be a number", exchange);
+						return;
+					}
 				}
 			}
 
-			String report = new DataImporter().runImport(params[2], levels).message;							
+			String username = params[2].split("\\?")[0];
+
+			String report = new DataImporter().runImport(username, levels, seed).message;							
 			sendOutData(report, exchange);
 		}
 		
@@ -334,7 +367,6 @@ public class MainServer
 				{
 					try
 					{
-						
 						InputStream body=exchange.getRequestBody();
 						String bodyParts=streamToString(body);
 						System.out.println("    Response Body: " + bodyParts);
@@ -595,6 +627,19 @@ public class MainServer
 	    return false;  
 	  }  
 	  return true;  
+	}
+	
+	private Map<String, String> queryToMap(String query){
+	    Map<String, String> result = new HashMap<String, String>();
+	    for (String param : query.split("&")) {
+	        String pair[] = param.split("=");
+	        if (pair.length>1) {
+	            result.put(pair[0], pair[1]);
+	        }else{
+	            result.put(pair[0], "");
+	        }
+	    }
+	    return result;
 	}
 
 }

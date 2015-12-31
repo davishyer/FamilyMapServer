@@ -130,7 +130,7 @@ public class ServerFacade
 			db.closeTransaction(true);
 			
 			//transactions are automatically handled by the DataImporter
-			success = new DataImporter().runImport(user.username, MAX_GENERATIONS).status;
+			success = new DataImporter().runImport(user.username, MAX_GENERATIONS, null).status;
 
 		}
 		catch(SQLException e)

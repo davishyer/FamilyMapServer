@@ -3,7 +3,6 @@ package dataBase;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.UUID;
 
 import model.User;
 
@@ -194,7 +193,7 @@ public class DBAccessUsers
 	
 	private String makeToken()
 	{
-		return UUID.randomUUID().toString().substring(0, AUTH_TOKEN_LENGTH);
+		return MyRandomGenerator.getInstance().randomUUID().substring(0, AUTH_TOKEN_LENGTH);
 	}
 	
 }
