@@ -42,7 +42,7 @@ import dataBase.DataImporter;
 public class MainServer 
 {
 	private static final int MAX_WAITING_CONNECTION = 10;
-	private static int MAX_GENERATIONS = 5; //this number is also in ServerFacade.
+	private static int MAX_GENERATIONS = 5;
 	private HttpServer server;
 	private static int SERVER_PORT_NUMBER;
 	private ServerFacade facade;
@@ -130,7 +130,7 @@ public class MainServer
 
 		server.createContext("/", indexHandler);
 		
-		facade = new ServerFacade();
+		facade = new ServerFacade(MAX_GENERATIONS);
 		
 		server.start();
 	}
@@ -187,6 +187,8 @@ public class MainServer
 				return;
 			}
 
+			String username = params[2].split("\\?")[0];
+			
 			Integer seed = null;
 			String queryString = exchange.getRequestURI().getQuery();
 			if(queryString != null)
@@ -194,21 +196,21 @@ public class MainServer
 				Map<String, String> querys = queryToMap(queryString);
 				if(querys.containsKey("seed"))
 				{
-					if(isNumeric(querys.get("seed")))
+					try
 					{
 						seed = new Integer(querys.get("seed"));
+						seed = username.hashCode() + seed;
 						seed = Math.abs(seed);
 					}
-					else
+					catch (NumberFormatException e)
 					{
-						sendOutData("The seed option needs to be a number", exchange);
+						sendOutData("The supplied seed is either not a number or is too large.", exchange);
 						return;
-					}
-						
+					}	
 				}
 				if(querys.containsKey("generations"))
 				{
-					if(isNumeric(querys.get("generations")))
+					try
 					{
 						levels = Integer.parseInt(querys.get("generations"));
 						levels = Math.abs(levels);
@@ -218,15 +220,13 @@ public class MainServer
 							return;
 						}
 					}
-					else
+					catch (NumberFormatException e)
 					{
-						sendOutData("The generations option needs to be a number", exchange);
+						sendOutData("The generations option is either not a number or too large.", exchange);
 						return;
 					}
 				}
 			}
-
-			String username = params[2].split("\\?")[0];
 
 			String report = new DataImporter().runImport(username, levels, seed).message;							
 			sendOutData(report, exchange);
@@ -615,19 +615,6 @@ public class MainServer
 		obj.addProperty("message",message);
 		return obj;
 	}
-
-	private static boolean isNumeric(String str)  
-	{  
-	  try  
-	  {  
-	    Double.parseDouble(str);  
-	  }  
-	  catch(NumberFormatException nfe)  
-	  {  
-	    return false;  
-	  }  
-	  return true;  
-	}
 	
 	private Map<String, String> queryToMap(String query){
 	    Map<String, String> result = new HashMap<String, String>();
@@ -641,5 +628,4 @@ public class MainServer
 	    }
 	    return result;
 	}
-
 }

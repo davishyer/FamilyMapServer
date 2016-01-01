@@ -12,7 +12,11 @@ import model.User;
 public class ServerFacade 
 {
 	
-	private static int MAX_GENERATIONS = 5;
+	private static int MAX_GENERATIONS;
+
+	
+	public ServerFacade(int max_gen) {MAX_GENERATIONS = max_gen;}
+	
 	
 	public List<Person> getUserNamesFamily(String username)
 	{
