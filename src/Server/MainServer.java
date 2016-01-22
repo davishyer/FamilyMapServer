@@ -80,7 +80,9 @@ public class MainServer
 			}
 			
 			System.out.println("Server started on port:" + args[0]);
+			
 			new MainServer().run();		
+			
 		}
 	}
 	
@@ -116,7 +118,16 @@ public class MainServer
 		catch (IOException e)
 		{
 			System.out.println("Could not create HTTP server: " + e.getMessage());
-			e.printStackTrace();
+			
+			if(e.getMessage().contains("Address already in use"))
+			{
+				System.out.println("You have another server already running on this port. Close it"
+						+ " and try again");
+			}
+			else
+			{
+				e.printStackTrace();
+			}
 			return;
 		}
 		
