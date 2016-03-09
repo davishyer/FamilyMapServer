@@ -962,7 +962,7 @@
     },
     {
       "latitude": "51.4833",
-      "longitude": "NaN",
+      "longitude": "0.0000",
       "city": "Greenwich",
       "country": "United Kingdom"
     },
@@ -1339,7 +1339,7 @@
     },
     {
       "latitude": "46.7333",
-      "longitude": "NaN",
+      "longitude": "-116.995905",
       "city": "Moscow",
       "country": "United States"
     },
@@ -1641,8 +1641,8 @@
       "country": "France"
     },
     {
-      "latitude": "NaN",
-      "longitude": "NaN",
+      "latitude": "43.531921",
+      "longitude": "-5.670343",
       "city": "Gijón",
       "country": "Spain"
     },
