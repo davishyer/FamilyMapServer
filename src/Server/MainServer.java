@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.regex.PatternSyntaxException;
 
 import model.AuthToken;
 import model.Event;
@@ -138,6 +139,7 @@ public class MainServer
 		server.createContext("/person", personHandler);
 		server.createContext("/event", eventHandler);
 		server.createContext("/user", usersHandler);
+		server.createContext("/load", loadHandler);
 
 		server.createContext("/", indexHandler);
 		
@@ -145,6 +147,39 @@ public class MainServer
 		
 		server.start();
 	}
+	
+	private HttpHandler loadHandler = new HttpHandler()
+	{
+		@Override
+		public void handle(HttpExchange exchange)
+		{
+			Calendar cal = Calendar.getInstance();
+			System.out.println("Load API was just called at " + dateFormat.format(cal.getTime()));
+			URI command=exchange.getRequestURI();
+			String theCommand=command.toString();
+
+			System.out.println("    Received URI: " + theCommand);
+			
+			String[] params;
+			try {
+				params=theCommand.split("/");
+			} catch(PatternSyntaxException e) {
+				sendOutData(makeMessage("Failed. Please specify a user. Example: /load/[USERNAME]?json\\=[FILEPATH]"), exchange);
+				return;
+			}
+			if(params.length < 2)
+			{
+				sendOutData(makeMessage("Failed. Please specify a user. Example: /load/[USERNAME]?json\\=[FILEPATH]"), exchange);
+				return;
+			}
+			String[] args = params[2].split("\\?");
+			String username = args[0];
+			String file = args[1].split("\\=")[1];
+
+			String report = new DataImporter().runImport(username, file).message;							
+			sendOutData(report, exchange);
+		}
+	};
 
 	private HttpHandler clearHandler = new HttpHandler()
 	{

@@ -3,6 +3,8 @@ package dataBase;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
@@ -17,6 +19,7 @@ import model.User;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class DataImporter 
 {
@@ -30,6 +33,97 @@ public class DataImporter
 	int eventsAdded = 0;
 	DataBase db = new DataBase();
 	MyRandomGenerator rand;
+	
+	/**
+	 * Imports JSON file into database for a given user
+	 * @param username -> user for data to be associated with
+	 * @param file -> name of JSON file to be imported
+	 * @return message indicating result of import
+	 */
+	public RunImportReturnObj runImport(String username, String file)
+	{
+		try {
+			// reset database for provided user
+			db.startTransaction();
+			db.fillReset(username);
+			db.closeTransaction(true);
+			
+			db.startTransaction();
+			
+			// check that the user exists
+			if(db.usersTable.getUserByUserName(username) == null) {
+				db.closeTransaction(false);
+				return new RunImportReturnObj("The supplied user is not yet registered. Please register the user first", false);
+			}
+			
+			// read the json file
+			JsonObject obj = (JsonObject) new JsonParser().parse(new FileReader("data/" + file));
+			
+			// add each person object to the database
+			JsonArray persons = obj.has("persons") ? obj.getAsJsonArray("persons") : new JsonArray();
+			personsAdded = persons.size();
+			for(Object object : persons)
+				db.personTable.addPerson(parsePersonJson((JsonObject)object, username));
+			
+			// add each event object to the database
+			JsonArray events = obj.has("events") ? obj.getAsJsonArray("events") : new JsonArray();
+			eventsAdded = events.size();
+			for(Object object : events)
+				db.eventsTable.addEvent(parseEventJson((JsonObject)object, username));
+			
+			db.closeTransaction(true);
+			return new RunImportReturnObj("Successfully added " + String.valueOf(personsAdded) + " people and " 
+											+ String.valueOf(eventsAdded) + " events for " + username, true);
+			
+		} catch (FileNotFoundException e) {
+			db.closeTransaction(false);
+			return new RunImportReturnObj("JSON file does not exist", false);
+		} catch (SQLException e) {
+			db.closeTransaction(false);
+			return new RunImportReturnObj("SQL error", false);
+		}
+	}
+	
+	/**
+	 * Create a person object based on provided json object
+	 * @param obj -> json object of the person to be created
+	 * @param username -> username to become the descendant
+	 * @return newly created person object
+	 */
+	private Person parsePersonJson(JsonObject obj, String username) {
+		Person p = new Person();
+		p.firstName = obj.has("firstname") ? obj.get("firstname").getAsString() : null;
+		p.lastName = obj.has("lastname") ? obj.get("lastname").getAsString() : null;
+		p.gender = obj.has("gender") ? obj.get("gender").getAsString() : null;
+		p.personID = obj.has("personID") ? obj.get("personID").getAsString() : null;
+		p.spouse = obj.has("spouse") ? obj.get("spouse").getAsString() : null;
+		p.father = obj.has("father") ? obj.get("father").getAsString() : null;
+		p.mother = obj.has("mother") ? obj.get("mother").getAsString() : null;
+		p.descendant = username;
+		return p;
+	}
+	
+	/**
+	 * Create an event object based on provided json object
+	 * @param obj -> json object of the event to be created
+	 * @param username -> username to become the descendant
+	 * @return newly created event object
+	 */
+	private Event parseEventJson(JsonObject obj, String username) {
+		rand = MyRandomGenerator.getInstance();
+		rand.setSeed((int)System.nanoTime());
+		Event e = new Event();
+		e.description = obj.has("description") ? obj.get("description").getAsString() : null;
+		e.personID = obj.has("personID") ? obj.get("personID").getAsString() : null;
+		e.city = obj.has("city") ? obj.get("city").getAsString() : null;
+		e.country = obj.has("country") ? obj.get("country").getAsString() : null;
+		e.latitude = obj.has("latitude") ? obj.get("latitude").getAsDouble() : null;
+		e.longitude = obj.has("longitude") ? obj.get("longitude").getAsDouble() : null;
+		e.year = obj.has("year") ? obj.get("year").getAsString() : null;
+		e.eventID = obj.has("eventID") ? obj.get("eventID").getAsString() : rand.randomUUID();
+		e.descendant = username;
+		return e;
+	}
 	
 	public RunImportReturnObj runImport(String username, int level, Integer seed)
 	{
