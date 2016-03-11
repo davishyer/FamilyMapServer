@@ -104,11 +104,16 @@
                 document.getElementById("handleBox").value = "/clear/";
                 document.getElementById("requestBox").value = "";
             }
+            function load()
+            {
+                document.getElementById("handleBox").value = "/load/[Replace_With_User_Name]";
+                document.getElementById("requestBox").value = formatJson("{file:\"example.json\"}")
+            }
             function fill(includeOptions)
             {
-		var api = "/fill/[Replace_With_User_Name]";
-		if(includeOptions)
-			api += "?seed=N&generations=M";
+        		var api = "/fill/[Replace_With_User_Name]";
+        		if(includeOptions)
+        			api += "?seed=N&generations=M";
                 document.getElementById("handleBox").value = api;
                 document.getElementById("requestBox").value = "";
             }
@@ -151,6 +156,14 @@
                 <li>
                     <a href="javascript:clear()" >/clear/</a> This API will clear ALL data from the database, including users and all generated data.
                     This API can be run from a browser by simply typing it in the address bar or by clicking this link followed by pressing the Submit button below.
+                    No authorization token is required.
+                </li>
+                <li>
+                    <a href="javascript:load()">/load/[username]</a> This API will load the server&apos;s database with data provided by a json file for the specified user name.
+                    The "username" parameter is required and must be a user already registered with the server. It can be any username you choose.
+                    The json file will be specified in the body of the request, and must correspond to a json file stored in the data directory of the server.
+                    A example.json file is provided to get you started with loading specific data.
+                    If there is any data in the database associated with the given username, it is erased.
                     No authorization token is required.
                 </li>
                 <li>

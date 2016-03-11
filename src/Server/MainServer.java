@@ -34,7 +34,10 @@ import com.sun.net.httpserver.*;
 import facade.ServerFacade;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 import dataBase.DataBase;
 import dataBase.DataImporter;
@@ -164,20 +167,34 @@ public class MainServer
 			try {
 				params=theCommand.split("/");
 			} catch(PatternSyntaxException e) {
-				sendOutData(makeMessage("Failed. Please specify a user. Example: /load/[USERNAME]?json\\=[FILEPATH]"), exchange);
+				sendOutData(makeMessage("Failed. Please specify a user. Example: /load/<USERNAME>"), exchange);
 				return;
 			}
-			if(params.length < 2)
+			if(params.length <= 2)
 			{
-				sendOutData(makeMessage("Failed. Please specify a user. Example: /load/[USERNAME]?json\\=[FILEPATH]"), exchange);
+				sendOutData(makeMessage("Failed. Please specify a user. Example: /load/<USERNAME>"), exchange);
 				return;
 			}
-			String[] args = params[2].split("\\?");
-			String username = args[0];
-			String file = args[1].split("\\=")[1];
+			String username = params[2];
 
-			String report = new DataImporter().runImport(username, file).message;							
-			sendOutData(report, exchange);
+			InputStream input = exchange.getRequestBody();
+			try {
+				String body = streamToString(input);
+				JsonObject json = (JsonObject) new JsonParser().parse(body);
+				String file = json.has("file") ? json.get("file").getAsString() : null;
+				if(file == null) {
+					sendOutData(makeMessage("No file parameter was provided"), exchange);
+					return;
+				}
+				String report = new DataImporter().runImport(username, file).message;							
+				sendOutData(report, exchange);
+			} catch (IOException e) {
+				e.printStackTrace();
+				sendOutData(makeMessage("Failed. Something went wrong"), exchange);
+			} catch (ClassCastException e) {
+				e.printStackTrace();
+				sendOutData(makeMessage("Failed. No request body was found"), exchange);
+			}
 		}
 	};
 
@@ -229,7 +246,7 @@ public class MainServer
 			
 			if(params.length <= 2)
 			{
-				sendOutData(makeMessage("Failed. Please specify a user. Example: /fill/[USERNAME]"), exchange);
+				sendOutData(makeMessage("Failed. Please specify a user. Example: /fill/<USERNAME>"), exchange);
 				return;
 			}
 
@@ -406,7 +423,7 @@ public class MainServer
 			String[] params=theCommand.split("/");
 			
 			if(params.length < 3)
-				sendOutData(makeMessage("More info needed. eg. /users/[LOGIN] OR [REGISTER]"), exchange);
+				sendOutData(makeMessage("More info needed. eg. /users/<LOGIN> OR <REGISTER>"), exchange);
 			else
 			{
 				if(params[2].equals("login"))
@@ -629,7 +646,8 @@ public class MainServer
 				exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
 
 				OutputStreamWriter sendBack = new OutputStreamWriter(exchange.getResponseBody(), Charset.forName("UTF-8"));
-				String json = gson.toJson(obj);
+				Gson gson_two = new GsonBuilder().disableHtmlEscaping().create();
+				String json = gson_two.toJson(obj);
 				sendBack.write(json);
 				sendBack.close();
 			}

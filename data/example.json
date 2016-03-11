@@ -1,0 +1,21 @@
+{
+	"persons": [
+		{
+			"firstname": "Sheila",
+			"lastname": "Parker",
+			"gender": "f",
+			"personID": "Sheila_Parker"
+		}
+	],
+	"events": [
+		{
+			"description": "started family map",
+			"personID": "Sheila_Parker",
+			"city": "Salt Lake City",
+			"country": "United States",
+			"latitude": "40.7500",
+			"longitude": "-110.1167",
+			"year": "2016"
+		}
+	]
+}
