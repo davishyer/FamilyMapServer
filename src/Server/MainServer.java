@@ -162,20 +162,6 @@ public class MainServer
 			String theCommand=command.toString();
 
 			System.out.println("    Received URI: " + theCommand);
-			
-			String[] params;
-			try {
-				params=theCommand.split("/");
-			} catch(PatternSyntaxException e) {
-				sendOutData(makeMessage("Failed. Please specify a user. Example: /load/<USERNAME>"), exchange);
-				return;
-			}
-			if(params.length <= 2)
-			{
-				sendOutData(makeMessage("Failed. Please specify a user. Example: /load/<USERNAME>"), exchange);
-				return;
-			}
-			String username = params[2];
 
 			InputStream input = exchange.getRequestBody();
 			try {
@@ -186,7 +172,7 @@ public class MainServer
 					sendOutData(makeMessage("No file parameter was provided"), exchange);
 					return;
 				}
-				String report = new DataImporter().runImport(username, file).message;							
+				String report = new DataImporter().runImport(file).message;
 				sendOutData(report, exchange);
 			} catch (IOException e) {
 				e.printStackTrace();

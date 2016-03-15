@@ -1,4 +1,13 @@
 {
+	"user": {
+		"username": "sheila",
+		"password": "parker",
+		"email": "sheila@parker.com",
+		"firstname": "Sheila",
+		"lastname": "Parker",
+		"gender": "f",
+		"personID": "Sheila_Parker"
+	},
 	"persons": [
 		{
 			"firstname": "Sheila",

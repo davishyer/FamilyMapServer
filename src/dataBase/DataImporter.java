@@ -36,44 +36,46 @@ public class DataImporter
 	
 	/**
 	 * Imports JSON file into database for a given user
-	 * @param username -> user for data to be associated with
 	 * @param file -> name of JSON file to be imported
 	 * @return message indicating result of import
 	 */
-	public RunImportReturnObj runImport(String username, String file)
+	public RunImportReturnObj runImport(String file)
 	{
 		try {
-			// reset database for provided user
+			// reset database
 			db.startTransaction();
-			db.fillReset(username);
+			db.resetDB(true);
 			db.closeTransaction(true);
 			
 			db.startTransaction();
 			
-			// check that the user exists
-			if(db.usersTable.getUserByUserName(username) == null) {
-				db.closeTransaction(false);
-				return new RunImportReturnObj("The supplied user is not yet registered. Please register the user first", false);
-			}
-			
 			// read the json file
 			JsonObject obj = (JsonObject) new JsonParser().parse(new FileReader("data/" + file));
 			
+			// register user
+			JsonObject json_user = obj.has("user") ? obj.getAsJsonObject("user") : null;
+			if(json_user == null) {
+				db.closeTransaction(false);
+				return new RunImportReturnObj("No user object was found", false);
+			}
+			User user = parseUserJson(json_user);
+			db.usersTable.regesterUser(user);
+
 			// add each person object to the database
 			JsonArray persons = obj.has("persons") ? obj.getAsJsonArray("persons") : new JsonArray();
 			personsAdded = persons.size();
 			for(Object object : persons)
-				db.personTable.addPerson(parsePersonJson((JsonObject)object, username));
+				db.personTable.addPerson(parsePersonJson((JsonObject)object, user.username));
 			
 			// add each event object to the database
 			JsonArray events = obj.has("events") ? obj.getAsJsonArray("events") : new JsonArray();
 			eventsAdded = events.size();
 			for(Object object : events)
-				db.eventsTable.addEvent(parseEventJson((JsonObject)object, username));
+				db.eventsTable.addEvent(parseEventJson((JsonObject)object, user.username));
 			
 			db.closeTransaction(true);
 			return new RunImportReturnObj("Successfully added " + String.valueOf(personsAdded) + " people and " 
-											+ String.valueOf(eventsAdded) + " events for " + username, true);
+											+ String.valueOf(eventsAdded) + " events for " + user.username, true);
 			
 		} catch (FileNotFoundException e) {
 			db.closeTransaction(false);
@@ -83,7 +85,24 @@ public class DataImporter
 			return new RunImportReturnObj("SQL error", false);
 		}
 	}
-	
+
+	/**
+	 * Create a user object based on the provided json object
+	 * @param obj -> json object of the user to be created
+	 * @return newly created user object
+	 */
+	private User parseUserJson(JsonObject obj) {
+		User user = new User();
+		user.email = obj.has("email") ? obj.get("email").getAsString() : null;
+		user.firstName = obj.has("firstname") ? obj.get("firstname").getAsString() : null;
+		user.lastName = obj.has("lastname") ? obj.get("lastname").getAsString() : null;
+		user.gender = obj.has("gender") ? obj.get("gender").getAsString() : null;
+		user.username = obj.has("username") ? obj.get("username").getAsString() : null;
+		user.password = obj.has("password") ? obj.get("password").getAsString() : null;
+		user.personId = obj.has("personID") ? obj.get("personID").getAsString() : user.firstName + "_" + user.lastName;
+		return user;
+	}
+
 	/**
 	 * Create a person object based on provided json object
 	 * @param obj -> json object of the person to be created
